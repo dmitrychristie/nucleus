@@ -110,40 +110,19 @@ const fbpCookie = getCookie('_fbp');
 const formSubmittedTrack = (event, formValuesCache) => {
   try {
     const formElement = event.target;
-    const data = {};
+    const traits = {
+      firstName: formValuesCache['first_name'] || null,
+      lastName: formValuesCache['last_name'] || null,
+      email: formValuesCache['email'] || null,
+      phone: formValuesCache['phone_number'] || null,
+      company: formValuesCache['company'] || null,
+      country: formValuesCache['country'] || null,
+    };
 
-    // Update formValuesCache with the latest non-empty values from the form
-    const inputFields = formElement.querySelectorAll('input, textarea, select');
-    inputFields.forEach((inputField) => {
-      const name = inputField.name;
-      const value = inputField.value.trim(); // Trim to handle whitespace-only values
+    // Call the identify function from Segment with only traits
+    analytics.identify(traits);
 
-      if (value !== '') {
-        formValuesCache[name] = value;
-      }
-    });
-
-    // Populate data object with the values from formValuesCache
-    Object.keys(formValuesCache).forEach((name) => {
-      // Exclude checkboxes from additional properties
-      const isCheckbox = formElement.querySelector(`[name="${name}"][type="checkbox"]`);
-      if (!isCheckbox) {
-        data[name] = formValuesCache[name];
-      }
-    });
-
-    console.log('Form Data:', formValuesCache);
-    console.log('Cached Form Values:', data);
-
-    const traits = {};
-    formFieldTraitMapping.forEach((mapping) => {
-      const { inputName, traitName } = mapping;
-      if (data[inputName]) {
-        traits[traitName] = data[inputName];
-      }
-    });
-
-
+    // Track the form submission
     analytics.track(
       'Form Submitted',
       {
@@ -154,13 +133,8 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_description: formElement.dataset.formDescription,
         form_location: document.location.pathname,
         form_result: 'success',
-        _fbc: fbcCookie || null, // Use null if cookie value is not available
-    	_fbp: fbpCookie || null, // Use null if cookie value is not available
-        ...data,
       },
       {
-        active: '<active>',
-        session_id: Date.now().toString(),
         traits,
       }
     );
