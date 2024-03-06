@@ -57,8 +57,12 @@
     }
   }();
 
+const qaCookie = getCookie('qa');
+const isQAMode = qaCookie === 'true';
 
-  
+if (isQAMode) {
+	console.log('QA mode enabled');
+}
   
 // Segment Events  
   
