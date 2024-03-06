@@ -39,7 +39,7 @@
           "vendors.theknot.com": "7uNVcxnOSBpg3EinntFqHEo4Dqna4EETTTTT",
           // Add more domain-key pairs as needed
         };
-
+	console.log(domain);
         // Check if the domain exists in the writeKeys object
         if (writeKeys.hasOwnProperty(domain)) {
           return writeKeys[domain];
