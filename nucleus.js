@@ -147,50 +147,46 @@ const formSubmittedTrack = (event, formValuesCache) => {
 };
 
   
-function getCookie(cookieName, domain) {
+function getCookie(cookieName) {
   const name = cookieName + '=';
   const decodedCookie = decodeURIComponent(document.cookie);
   const cookieArray = decodedCookie.split(';');
-  const currentDomain = domain || window.location.hostname;
+  const currentDomain = window.location.hostname;
 
-  // Check for the current domain and its root domain
-  const domainsToCheck = [currentDomain];
-  if (currentDomain.split('.').length > 1) {
-    const parts = currentDomain.split('.');
-    const rootDomain = parts.slice(-2).join('.');
-    domainsToCheck.push(rootDomain);
-  }
+  // Always set cookies for the root domain
+  const rootDomain = currentDomain.split('.').slice(-2).join('.');
 
-  // Iterate over cookies and check for the matching domain
-  for (let i = 0; i < cookieArray.length; i++) {
-    let cookie = cookieArray[i];
-    while (cookie.charAt(0) === ' ') {
-      cookie = cookie.substring(1);
-    }
-    for (const domainToCheck of domainsToCheck) {
-      if (cookie.indexOf(name) === 0 && cookie.includes(`${name}${cookieName}`)) {
-        return cookie.split('=')[1];
-      }
-    }
-  }
+  // Function to get query parameter value from URL
+  const getQueryParam = (param) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  };
 
-  // If cookie is not found, generate it for _fbp and _fbc
-  if (cookieName === '_fbp') {
+  // Check if _fbp cookie exists
+  let fbpCookie = cookieArray.find((cookie) => cookie.trim().startsWith('_fbp='));
+  if (!fbpCookie) {
     const subdomainIndex = 1;
     const creationTime = Date.now();
     const randomnumber = Math.floor(Math.random() * 10000000000);
-    const fbpCookieValue = `fb.${subdomainIndex}.${creationTime}.${randomnumber}`;
-    document.cookie = `_fbp=${fbpCookieValue};domain=${currentDomain};path=/;max-age=63072000;SameSite=None;Secure`;
-    return fbpCookieValue;
+    fbpCookie = `_fbp=fb.${subdomainIndex}.${creationTime}.${randomnumber};domain=${rootDomain};path=/;max-age=63072000;SameSite=None;Secure`;
+    document.cookie = fbpCookie;
+    return fbpCookie.split('=')[1];
   }
 
-  if (cookieName === '_fbc') {
+  // Check if _fbc cookie should be generated
+  if (cookieName === '_fbc' && getQueryParam('fbclid')) {
     const subdomainIndex = 1;
     const creationTime = Date.now();
-    const fbclid = 'example_fbclid_value'; // You should replace this with the actual fbclid value
-    const fbcCookieValue = `fb.${subdomainIndex}.${creationTime}.${fbclid}`;
-    document.cookie = `_fbc=${fbcCookieValue};domain=${currentDomain};path=/;max-age=63072000;SameSite=None;Secure`;
-    return fbcCookieValue;
+    const fbclid = getQueryParam('fbclid');
+    const fbcCookieValue = `_fbc=fb.${subdomainIndex}.${creationTime}.${fbclid};domain=${rootDomain};path=/;max-age=63072000;SameSite=None;Secure`;
+    document.cookie = fbcCookieValue;
+    return fbclid;
+  }
+
+  // If cookie is not found, return null
+  const foundCookie = cookieArray.find((cookie) => cookie.trim().startsWith(`${name}`));
+  if (foundCookie) {
+    return foundCookie.split('=')[1];
   }
 
   return null;
