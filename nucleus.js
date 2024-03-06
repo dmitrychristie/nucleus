@@ -151,17 +151,31 @@ function getCookie(cookieName) {
   const name = cookieName + '=';
   const decodedCookie = decodeURIComponent(document.cookie);
   const cookieArray = decodedCookie.split(';');
+  const domain = window.location.hostname;
+  
+  // Check for the current domain and its root domain
+  const domainsToCheck = [domain];
+  if (domain.split('.').length > 1) {
+    const parts = domain.split('.');
+    const rootDomain = parts.slice(-2).join('.');
+    domainsToCheck.push(rootDomain);
+  }
+
+  // Iterate over cookies and check for the matching domain
   for (let i = 0; i < cookieArray.length; i++) {
     let cookie = cookieArray[i];
     while (cookie.charAt(0) === ' ') {
       cookie = cookie.substring(1);
     }
-    if (cookie.indexOf(name) === 0) {
-      return cookie.substring(name.length, cookie.length);
+    for (const domainToCheck of domainsToCheck) {
+      if (cookie.indexOf(name) === 0 && cookie.includes(`${name}${cookieName}`)) {
+        return cookie.split('=')[1];
+      }
     }
   }
   return null;
 }
+
 
 
 
