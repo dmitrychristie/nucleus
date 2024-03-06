@@ -1,4 +1,3 @@
-<script>
 
 
 
@@ -133,4 +132,3 @@ function getCookie(cookieName) {
 
 
 
-</script>
