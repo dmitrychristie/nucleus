@@ -133,6 +133,8 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_description: formElement.dataset.formDescription,
         form_location: document.location.pathname,
         form_result: 'success',
+        _fbc: fbcCookie || null, // Add _fbc property with the value from the fbcCookie
+        _fbp: fbpCookie || null, // Add _fbp property with the value from the fbpCookie
       },
       {
         traits,
