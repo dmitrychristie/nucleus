@@ -57,11 +57,11 @@
     }
   }();
 
-const qaCookie = getCookie('qa');
-const isQAMode = qaCookie === 'true';
+const debugMode = getCookie('debug_mode');
+const isDebugMode = debugMode === 'true';
 
-if (isQAMode) {
-	console.log('QA mode enabled');
+if (isDebugMode) {
+	console.log('Debug mode enabled');
 }
   
 // Segment Events  
