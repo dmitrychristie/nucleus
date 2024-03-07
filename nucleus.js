@@ -36,7 +36,9 @@
       function getWriteKey() {
         var domain = window.location.hostname;
         var writeKeys = {
-          "vendors.theknot.com": "7uNVcxnOSBpg3EinntFqHEo4Dqna4EEO",
+		"vendors.theknot.com": "7uNVcxnOSBpg3EinntFqHEo4Dqna4EEO",
+		"landing.hitched.co.uk": "JAx81AikCaWgsRfRFmx6RBz953eGVHqH",
+	
           // Add more domain-key pairs as needed
         };
 	console.log(domain);
