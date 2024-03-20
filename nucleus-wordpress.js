@@ -66,15 +66,7 @@ if (isDebugMode) {
 	console.log('Debug mode enabled');
 }
 
-// output console.log in the parent window.
 
-var console = {
-    panel: $(parent.document.body).append('<div>'),
-    log: function(m){
-        this.panel.prepend('<div>'+m+'</div>');
-    }       
-};
-console.log('message');
 
 
 
