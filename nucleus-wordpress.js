@@ -74,29 +74,50 @@ if (isDebugMode) {
   
 window.onload = function () {
   try {
-   
-    const formValuesCache = {};
+    const formValuesCaches = {};
 
-    const form = document.querySelector('.form');
+    const processForm = (form) => {
+      if (form) {
+        const formId = form.getAttribute('id') || 'form_' + Math.random().toString(36).substring(2, 15);
+        const formValuesCache = formValuesCaches[formId] || {};
 
-    if (form) {
-      form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
+        form.addEventListener('submit', (event) => formSubmittedTrack(event, form, formValuesCache));
 
-      // Add an event listener to each input field for real-time updates
-      const inputFields = form.querySelectorAll('input, textarea, select');
-      inputFields.forEach((inputField) => {
-        inputField.addEventListener('input', () => {
-          // Only update the cache if the input value is not empty
-          if (inputField.value.trim() !== '') {
-            // Update the cache with the latest value
-            formValuesCache[inputField.name] = inputField.value;
-            console.log('Updated Form Values:', formValuesCache);
-          }
+        const inputFields = form.querySelectorAll('input, textarea, select');
+        inputFields.forEach((inputField) => {
+          inputField.addEventListener('input', () => {
+            if (inputField.value.trim() !== '') {
+              formValuesCache[inputField.name] = inputField.value;
+              console.log('Updated Form Values:', formValuesCache);
+            }
+          });
         });
-      });
-    } else {
-      console.warn("Form element not found.");
-    }
+
+        formValuesCaches[formId] = formValuesCache;
+      } else {
+        console.warn("Form element not found.");
+      }
+    };
+
+    // Process forms in main document
+    const mainDocumentForms = document.querySelectorAll('.form');
+    mainDocumentForms.forEach((form) => {
+      processForm(form);
+    });
+
+    // Process forms in iframes
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach((iframe) => {
+      try {
+        const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        const iframeForms = iframeDocument.querySelectorAll('.form');
+        iframeForms.forEach((form) => {
+          processForm(form);
+        });
+      } catch (error) {
+        console.error('Error accessing iframe content:', error);
+      }
+    });
 
   } catch (error) {
     console.error('Error initializing form tracking:', error);
@@ -111,23 +132,16 @@ const formFieldTraitMapping = [
   { inputName: 'company', traitName: 'company' },
   { inputName: 'country', traitName: 'country' },
 ];
-  
-  
+
 const fbcCookie = getCookie('_fbc');
 const fbpCookie = getCookie('_fbp');
-  
 
-const formSubmittedTrack = (event, formValuesCache) => {
+const formSubmittedTrack = (event, formElement, formValuesCache) => {
   try {
-    const formElement = event.target;
-    const traits = {
-      firstName: formValuesCache['first_name'] || null,
-      lastName: formValuesCache['last_name'] || null,
-      email: formValuesCache['email'] || null,
-      phone: formValuesCache['phone_number'] || null,
-      company: formValuesCache['company'] || null,
-      country: formValuesCache['country'] || null,
-    };
+    const traits = formFieldTraitMapping.reduce((acc, field) => {
+      acc[field.traitName] = formValuesCache[field.inputName] || null;
+      return acc;
+    }, {});
 
     // Call the identify function from Segment with only traits
     analytics.identify(traits);
@@ -143,18 +157,17 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_description: formElement.dataset.formDescription,
         form_location: document.location.pathname,
         form_result: 'success',
-        _fbc: fbcCookie || null, // Add _fbc property with the value from the fbcCookie
-        _fbp: fbpCookie || null, // Add _fbp property with the value from the fbpCookie
+        _fbc: fbcCookie || null,
+        _fbp: fbpCookie || null,
       },
-      {
-        traits,
-      }
+      { traits }
     );
 
   } catch (error) {
     console.error('Error handling form submission:', error);
   }
 };
+
 
   
 function getCookie(cookieName) {
