@@ -1,17 +1,14 @@
-    window.addEventListener('message', function(event) {
-            // Check origin for security (replace 'https://weddingpro-com-staging.go-vip.net' with your actual parent URL)
-            if (event.origin !== 'https://weddingpro-com-staging.go-vip.net') {
-                console.error('Received message from invalid origin:', event.origin);
-                return;
-            }
+     function handleFormSubmission(event) {
+            // Prevent form submission
+            event.preventDefault();
 
-            // Handle the message received from parent
-            console.log('Message received from parent:', event.data);
-            // You can process the data received from parent here
+            // Send a message to parent when form is submitted
+            window.parent.postMessage('Form submitted from iframe!', 'https://weddingpro-com-staging.go-vip.net');
+        }
+
+        // Wait for DOM content to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listener to the form for submission
+            var form = document.getElementById('pardot-form');
+            form.addEventListener('submit', handleFormSubmission);
         });
-
-        // Timeout to simulate delayed action (replace with your actual logic)
-        setTimeout(function() {
-            // Send a message to parent
-            window.parent.postMessage('Hello from iframe!', 'https://weddingpro-com-staging.go-vip.net');
-        }, 2000); // Delayed action after 2 seconds
