@@ -1,26 +1,29 @@
-  window.addEventListener('message', function(event) {
-            // Check origin for security (replace 'https://go.weddingpro.com' with your actual iframe URL)
-            if (event.origin !== 'https://go.weddingpro.com') {
-                console.error('Received message from invalid origin:', event.origin);
-                return;
-            }
+function receiveMessageFromIframe(event) {
+    // Check origin for security (replace 'https://go.weddingpro.com' with your actual iframe URL)
+    if (event.origin !== 'https://go.weddingpro.com') {
+        console.error('Received message from invalid origin:', event.origin);
+        return;
+    }
 
-            // Handle the message received from iframe
-            console.log('Message received from iframe:', event.data);
-            // You can process the data received from iframe here
-        });
+    // Display the received message
+    console.log('Message received from iframe:', event.data);
 
-        // Timeout to check if iframe is loaded
-        var iframe = document.getElementById('myIframe');
-        var checkIframeLoaded = function() {
-            if (iframe.contentWindow) {
-                // Iframe is loaded, send a message to iframe
-                iframe.contentWindow.postMessage('Hello from parent!', 'https://go.weddingpro.com');
-            } else {
-                // Iframe is not yet loaded, try again after 1 second
-                setTimeout(checkIframeLoaded, 1000);
-            }
-        };
+    // You can display the message in a specific element or do any other processing here
+    var messageElement = document.getElementById('receivedMessage');
+    if (messageElement) {
+        messageElement.textContent = JSON.stringify(event.data, null, 2);
+    }
+}
 
-        // Start checking if iframe is loaded
-        checkIframeLoaded();
+// Listen for messages from the iframe
+window.addEventListener('message', receiveMessageFromIframe);
+
+// Function to handle sending messages to the iframe (optional)
+function sendMessageToIframe() {
+    var iframe = document.getElementById('yourIframeId');
+    if (iframe) {
+        iframe.contentWindow.postMessage('Hello from parent!', 'https://go.weddingpro.com');
+    } else {
+        console.error('Could not find iframe with specified ID.');
+    }
+}
