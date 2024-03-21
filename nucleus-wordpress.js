@@ -68,7 +68,7 @@ if (isDebugMode) {
 }
 
 
-    function trackEvent(eventName) {
+      function trackEvent(eventName) {
             // Replace this with your actual tracking code
             console.log('Tracking event:', eventName);
         }
@@ -78,6 +78,8 @@ if (isDebugMode) {
             var iframe = document.getElementById('pardot-homepagetab-form-iframe-1');
 
             if (iframe) {
+
+		    console.log('iframe was found');
                 iframe.addEventListener('load', function() {
                     var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
                     var buttonInIframe = iframeDocument.querySelector('input[type="submit"][value="Get in touch"]');
@@ -87,7 +89,6 @@ if (isDebugMode) {
                             // Track the click event here
                             trackEvent('Submit_Button_Clicked_In_Iframe');
                         });
-                        console.log('Successfully attached event listener to button in iframe.');
                     } else {
                         console.error('Button not found in iframe.');
                     }
