@@ -68,65 +68,45 @@ if (isDebugMode) {
 }
 
 
-var iframe = document.getElementById('pardot-homepagetab-form-iframe-1');
-
-// Check if the iframe exists
-if (iframe) {
-    // Create a script element
-    var scriptElement = document.createElement('script');
-
-    // Set the src attribute to your JavaScript file
-    scriptElement.src = 'https://dmitrychristie.github.io/nucleus/nucleus-wordpress.js'; // Update path to your actual file
-
-    // Wait for the iframe's document to be ready
-    iframe.addEventListener('load', function() {
-        // Once the iframe's content is loaded, get its document
-        var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-
-        // Append the script element to the iframe's document head
-        iframeDocument.head.appendChild(scriptElement);
-    });
-} else {
-    console.error('Could not find iframe with specified ID.');
-}
-
-
-
-// Get the iframe element by its ID
-var iframe = document.getElementById('pardot-homepagetab-form-iframe-1');
-
-// Function to handle tracking event
-function trackEvent(eventName) {
-    // Replace this with your actual GA4 tracking code
-    console.log('Tracking event:', eventName);
-    // Example: Send GA4 event
-    // gtag('event', 'click', { 'event_category': 'Button Click', 'event_label': eventName });
-}
-
-// Add event listener to track button click inside the iframe
-if (iframe) {
-    iframe.addEventListener('load', function() {
-        var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-        var buttonInIframe = iframeDocument.querySelector('input[type="submit"][value="Get in touch"]');
-
-        if (buttonInIframe) {
-            buttonInIframe.addEventListener('click', function() {
-                // Track the click event here
-                trackEvent('Submit_Button_Clicked_In_Iframe');
-            });
-        } else {
-            console.error('Button not found in iframe.');
+  // Function to handle tracking event
+        function trackEvent(eventName) {
+            // Replace this with your actual GA4 tracking code
+            console.log('Tracking event:', eventName);
+            // Example: Send GA4 event
+            // gtag('event', 'click', { 'event_category': 'Button Click', 'event_label': eventName });
         }
-    });
-} else {
-    console.error('Could not find iframe with specified ID (pardot-homepagetab-form-iframe-1).');
-}
 
-// Check if GA4 event listeners are attached
-if (typeof gtag === 'undefined') {
-    console.error('GA4 event listeners not attached. Check your GA4 setup.');
-}
+        // Function to search for the iframe and attach event listeners
+        function searchAndAttachListeners() {
+            var iframe = document.getElementById('pardot-homepagetab-form-iframe-1');
 
+            if (iframe) {
+                iframe.addEventListener('load', function() {
+                    var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+                    var buttonInIframe = iframeDocument.querySelector('input[type="submit"][value="Get in touch"]');
+
+                    if (buttonInIframe) {
+                        buttonInIframe.addEventListener('click', function() {
+                            // Track the click event here
+                            trackEvent('Submit_Button_Clicked_In_Iframe');
+                        });
+                    } else {
+                        console.error('Button not found in iframe.');
+                    }
+                });
+            } else {
+                console.error('Could not find iframe with specified ID (pardot-homepagetab-form-iframe-1). Retrying in 1 second...');
+                setTimeout(searchAndAttachListeners, 1000); // Retry after 1 second
+            }
+
+            // Check if GA4 event listeners are attached
+            if (typeof gtag === 'undefined') {
+                console.error('GA4 event listeners not attached. Check your GA4 setup.');
+            }
+        }
+
+        // Call the function to search for the iframe and attach listeners
+        searchAndAttachListeners();
 
 // Segment Events  
   
