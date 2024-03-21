@@ -1,6 +1,6 @@
-window.addEventListener('message', function(event) {
-            // Check origin for security (replace 'http://localhost:8080' with your actual iframe URL)
-            if (event.origin !== 'http://localhost:8080') {
+  window.addEventListener('message', function(event) {
+            // Check origin for security (replace 'https://weddingpro-com-staging.go-vip.net' with your actual iframe URL)
+            if (event.origin !== 'https://weddingpro-com-staging.go-vip.net') {
                 console.error('Received message from invalid origin:', event.origin);
                 return;
             }
@@ -15,7 +15,7 @@ window.addEventListener('message', function(event) {
         var checkIframeLoaded = function() {
             if (iframe.contentWindow) {
                 // Iframe is loaded, send a message to iframe
-                iframe.contentWindow.postMessage('Hello from parent!', 'http://localhost:8080');
+                iframe.contentWindow.postMessage('Hello from parent!', 'https://weddingpro-com-staging.go-vip.net');
             } else {
                 // Iframe is not yet loaded, try again after 1 second
                 setTimeout(checkIframeLoaded, 1000);
