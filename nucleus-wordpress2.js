@@ -68,31 +68,30 @@ if (isDebugMode) {
 }
 
 
-      function trackEvent(eventName) {
-            // Replace this with your actual tracking code
-            console.log('Tracking event:', eventName);
-        }
-
-        // Function to search for the iframe and attach event listeners
+   // Function to search for the iframe and attach event listeners
         function searchAndAttachListeners() {
             var iframe = document.getElementById('pardot-homepagetab-form-iframe-1');
 
             if (iframe) {
-
-		    console.log('iframe was found');
-                iframe.addEventListener('load', function() {
-                    var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-                    var buttonInIframe = iframeDocument.querySelector('input[type="submit"][value="Get in touch"]');
-
-                    if (buttonInIframe) {
-                        buttonInIframe.addEventListener('click', function() {
-                            // Track the click event here
-                            trackEvent('Submit_Button_Clicked_In_Iframe');
-                        });
-                    } else {
-                        console.error('Button not found in iframe.');
+		console.log('attached to the iframe');
+                var observer = new MutationObserver(function(mutationsList, observer) {
+                    for(var mutation of mutationsList) {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                            var buttonInIframe = iframe.contentDocument.querySelector('input[type="submit"][value="Get in touch"]');
+                            if (buttonInIframe) {
+                                buttonInIframe.addEventListener('click', function() {
+                                    // Track the click event here
+                                    trackEvent('Submit_Button_Clicked_In_Iframe');
+                                });
+                                console.log('Successfully attached event listener to button in iframe.');
+                                observer.disconnect(); // Stop observing once attached
+                                return;
+                            }
+                        }
                     }
                 });
+
+                observer.observe(iframe, { childList: true, subtree: true });
             } else {
                 console.error('Could not find iframe with specified ID (pardot-homepagetab-form-iframe-1). Retrying in 1 second...');
                 setTimeout(searchAndAttachListeners, 1000); // Retry after 1 second
