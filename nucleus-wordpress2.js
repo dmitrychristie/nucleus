@@ -8,17 +8,26 @@ function receiveMessageFromIframe(event) {
     // Display the received message
     console.log('Message received from iframe:', event.data);
 
-    // You can display the message in a specific element or do any other processing here
-    var messageElement = document.getElementById('receivedMessage');
-    if (messageElement) {
-        messageElement.textContent = JSON.stringify(event.data, null, 2);
+    // Trigger the same event in the parent window
+    if (event.data && event.data.event === 'b2bFormSubmission') {
+        handleFormSubmissionInParent(event.data.frameHREF);
     }
 }
 
 // Listen for messages from the iframe
 window.addEventListener('message', receiveMessageFromIframe);
 
-// Function to handle sending messages to the iframe (optional)
+// Function to handle form submission in the parent window
+function handleFormSubmissionInParent(frameHREF) {
+    console.log('Handling form submission in parent for frameHREF:', frameHREF);
+
+    // Add your code here to handle the form submission in the parent window
+    // This is where you would trigger your 'segmentFormSubmitted' event or any other action
+    // For example:
+    // gtag('event', 'segmentFormSubmitted', { 'frameHREF': frameHREF });
+}
+
+// Function to send a message to the iframe (optional)
 function sendMessageToIframe() {
     var iframe = document.getElementById('yourIframeId');
     if (iframe) {
