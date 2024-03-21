@@ -68,12 +68,10 @@ if (isDebugMode) {
 }
 
 
-  // Function to handle tracking event
+   // Function to handle tracking event
         function trackEvent(eventName) {
-            // Replace this with your actual GA4 tracking code
+            // Replace this with your actual tracking code
             console.log('Tracking event:', eventName);
-            // Example: Send GA4 event
-            // gtag('event', 'click', { 'event_category': 'Button Click', 'event_label': eventName });
         }
 
         // Function to search for the iframe and attach event listeners
@@ -97,11 +95,6 @@ if (isDebugMode) {
             } else {
                 console.error('Could not find iframe with specified ID (pardot-homepagetab-form-iframe-1). Retrying in 1 second...');
                 setTimeout(searchAndAttachListeners, 1000); // Retry after 1 second
-            }
-
-            // Check if GA4 event listeners are attached
-            if (typeof gtag === 'undefined') {
-                console.error('GA4 event listeners not attached. Check your GA4 setup.');
             }
         }
 
