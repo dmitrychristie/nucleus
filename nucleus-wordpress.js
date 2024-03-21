@@ -92,6 +92,40 @@ if (iframe) {
 
 
 
+// Get the iframe element by its ID
+var iframe = document.getElementById('pardot-homepagetab-form-iframe-1');
+
+// Function to handle tracking event
+function trackEvent(eventName) {
+    // Replace this with your actual GA4 tracking code
+    console.log('Tracking event:', eventName);
+    // Example: Send GA4 event
+    // gtag('event', 'click', { 'event_category': 'Button Click', 'event_label': eventName });
+}
+
+// Add event listener to track button click inside the iframe
+if (iframe) {
+    iframe.addEventListener('load', function() {
+        var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        var buttonInIframe = iframeDocument.querySelector('input[type="submit"][value="Get in touch"]');
+
+        if (buttonInIframe) {
+            buttonInIframe.addEventListener('click', function() {
+                // Track the click event here
+                trackEvent('Submit_Button_Clicked_In_Iframe');
+            });
+        } else {
+            console.error('Button not found in iframe.');
+        }
+    });
+} else {
+    console.error('Could not find iframe with specified ID (pardot-homepagetab-form-iframe-1).');
+}
+
+// Check if GA4 event listeners are attached
+if (typeof gtag === 'undefined') {
+    console.error('GA4 event listeners not attached. Check your GA4 setup.');
+}
 
 
 // Segment Events  
