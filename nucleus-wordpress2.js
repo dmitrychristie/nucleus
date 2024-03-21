@@ -11,6 +11,7 @@ function receiveMessageFromIframe(event) {
 
     // Trigger the same event in the parent window
     if (event.data && event.data.event === 'b2bFormSubmission') {
+        console.log('attempting to push the data layer event');        
         pushDataLayerEvent(event.data);
     }
 }
