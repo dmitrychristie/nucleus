@@ -67,6 +67,22 @@ if (isDebugMode) {
 }
 
 
+var iframe = document.getElementById('pardot-homepagetab-form-iframe-1');
+
+// Check if the iframe exists
+if (iframe) {
+    // Create a script element
+    var scriptElement = document.createElement('script');
+
+    // Set the src attribute to your JavaScript file
+    scriptElement.src = 'https://dmitrychristie.github.io/nucleus/nucleus-wordpress.js'; // Update path to your actual file
+
+    // Append the script element to the iframe's document body
+    iframe.contentDocument.body.appendChild(scriptElement);
+} else {
+    console.error('Could not find iframe with specified ID.');
+}
+
 
 
 
