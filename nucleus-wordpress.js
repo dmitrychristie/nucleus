@@ -68,8 +68,7 @@ if (isDebugMode) {
 }
 
 
-   // Function to handle tracking event
-        function trackEvent(eventName) {
+    function trackEvent(eventName) {
             // Replace this with your actual tracking code
             console.log('Tracking event:', eventName);
         }
@@ -88,6 +87,7 @@ if (isDebugMode) {
                             // Track the click event here
                             trackEvent('Submit_Button_Clicked_In_Iframe');
                         });
+                        console.log('Successfully attached event listener to button in iframe.');
                     } else {
                         console.error('Button not found in iframe.');
                     }
