@@ -26,12 +26,4 @@ function pushDataLayerEvent(data) {
     window.dataLayer.push(data);
 }
 
-// Function to send a message to the iframe (optional)
-function sendMessageToIframe() {
-    var iframe = document.getElementById('yourIframeId');
-    if (iframe) {
-        iframe.contentWindow.postMessage('Hello from parent!', 'https://go.weddingpro.com');
-    } else {
-        console.error('Could not find iframe with specified ID.');
-    }
-}
+
