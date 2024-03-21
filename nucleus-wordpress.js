@@ -55,6 +55,7 @@
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
+	      analytics.page();
       }
     }
   }();
@@ -77,11 +78,18 @@ if (iframe) {
     // Set the src attribute to your JavaScript file
     scriptElement.src = 'https://dmitrychristie.github.io/nucleus/nucleus-wordpress.js'; // Update path to your actual file
 
-    // Append the script element to the iframe's document body
-    iframe.contentDocument.body.appendChild(scriptElement);
+    // Wait for the iframe's document to be ready
+    iframe.addEventListener('load', function() {
+        // Once the iframe's content is loaded, get its document
+        var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+
+        // Append the script element to the iframe's document head
+        iframeDocument.head.appendChild(scriptElement);
+    });
 } else {
     console.error('Could not find iframe with specified ID.');
 }
+
 
 
 
