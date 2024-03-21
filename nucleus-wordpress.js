@@ -1,4 +1,4 @@
- window.addEventListener('message', function(event) {
+    window.addEventListener('message', function(event) {
             // Check origin for security (replace 'https://weddingpro-com-staging.go-vip.net' with your actual parent URL)
             if (event.origin !== 'https://weddingpro-com-staging.go-vip.net') {
                 console.error('Received message from invalid origin:', event.origin);
