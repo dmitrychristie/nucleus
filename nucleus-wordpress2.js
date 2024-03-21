@@ -1,3 +1,4 @@
+// Function to handle messages from the iframe
 function receiveMessageFromIframe(event) {
     // Check origin for security (replace 'https://go.weddingpro.com' with your actual iframe URL)
     if (event.origin !== 'https://go.weddingpro.com') {
@@ -10,21 +11,18 @@ function receiveMessageFromIframe(event) {
 
     // Trigger the same event in the parent window
     if (event.data && event.data.event === 'b2bFormSubmission') {
-        handleFormSubmissionInParent(event.data.frameHREF);
+        pushDataLayerEvent(event.data);
     }
 }
 
 // Listen for messages from the iframe
 window.addEventListener('message', receiveMessageFromIframe);
 
-// Function to handle form submission in the parent window
-function handleFormSubmissionInParent(frameHREF) {
-    console.log('Handling form submission in parent for frameHREF:', frameHREF);
-
-    // Add your code here to handle the form submission in the parent window
-    // This is where you would trigger your 'segmentFormSubmitted' event or any other action
-    // For example:
-    // gtag('event', 'segmentFormSubmitted', { 'frameHREF': frameHREF });
+// Function to push a dataLayer event
+function pushDataLayerEvent(data) {
+    // Push the received data to the dataLayer
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(data);
 }
 
 // Function to send a message to the iframe (optional)
