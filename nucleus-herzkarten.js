@@ -143,15 +143,23 @@ var targetPath = '/index.php?route=checkout/checkout';
 if (currentURL.indexOf(targetPath) !== -1) {
   console.log('On the checkout page. Ready to extract data.');
 
-  // Get the "COMPLETA L'ORDINE" button and add event listener
-  var checkoutButton = document.querySelector('#quick-checkout-button-confirm');
-  if (checkoutButton) {
-    checkoutButton.addEventListener('click', function() {
-      extractDataAndSetLocalStorage();
-    });
-  } else {
-    console.error('Button not found.');
-  }
+  // Check for the button every second
+  var checkButtonInterval = setInterval(function() {
+    var checkoutButton = document.querySelector('#quick-checkout-button-confirm');
+    if (checkoutButton) {
+      console.log('Button found.');
+      
+      // Add event listener once button is found
+      checkoutButton.addEventListener('click', function() {
+        extractDataAndSetLocalStorage();
+      });
+
+      // Clear the interval since we found the button
+      clearInterval(checkButtonInterval);
+    } else {
+      console.log('Button not found.');
+    }
+  }, 1000); 
 }
 
 
