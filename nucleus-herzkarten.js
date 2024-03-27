@@ -63,7 +63,8 @@ if (isConsentGranted()) {
           var writeKeys = {
             "vendors.theknot.com": "7uNVcxnOSBpg3EinntFqHEo4Dqna4EEO",
             "landing.hitched.co.uk": "JAx81AikCaWgsRfRFmx6RBz953eGVHqH",
-            "vendors.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC"
+            "vendors.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
+            "partecipazioni.matrimonio.com": "UCwS4l4zqdAIKlM4Osi7cvGFD6RfCoTL"
             // Add more domain-key pairs as needed
           };
           console.log(domain);
