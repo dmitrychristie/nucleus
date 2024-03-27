@@ -23,12 +23,6 @@ function isConsentGranted() {
 
 // for now, we're only tracking anaylytics, so we need to check for other groups in the future version
 
-const debugMode = getCookie('debug_mode');
-const isDebugMode = debugMode === 'true';
-
-if (isDebugMode) {
-	console.log('Debug mode enabled');
-}
 
 
 // Example usage
