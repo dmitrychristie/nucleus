@@ -87,6 +87,7 @@ if (isConsentGranted()) {
 
 
 // Collect the data for the Order Completed Event
+// Function to extract data from the HTML and set it in localStorage
 function extractDataAndSetLocalStorage() {
   var products = [];
 
@@ -135,18 +136,22 @@ function extractDataAndSetLocalStorage() {
   console.log('Order data stored in localStorage.');
 }
 
-// Event listener for the "COMPLETA L'ORDINE" button
-document.getElementById('quick-checkout-button-confirm').addEventListener('click', function() {
-  extractDataAndSetLocalStorage();
-});
-
 // Check if the current URL path matches /index.php?route=checkout/checkout
 var currentURL = window.location.href;
 var targetPath = '/index.php?route=checkout/checkout';
 
 if (currentURL.indexOf(targetPath) !== -1) {
-  // Execute the extraction and storage code
-  extractDataAndSetLocalStorage();
+  console.log('On the checkout page. Ready to extract data.');
+
+  // Get the "COMPLETA L'ORDINE" button and add event listener
+  var checkoutButton = document.querySelector('#quick-checkout-button-confirm');
+  if (checkoutButton) {
+    checkoutButton.addEventListener('click', function() {
+      extractDataAndSetLocalStorage();
+    });
+  } else {
+    console.error('Button not found.');
+  }
 }
 
 
