@@ -21,72 +21,6 @@ function isConsentGranted() {
   }
 }
 
-// Example usage
-if (isConsentGranted()) {
-  console.log("Consent is granted");
-
-  // Initialize Segment analytics only if consent is granted
-  !function(){
-    var analytics = window.analytics = window.analytics || [];
-    if (!analytics.initialize) {
-      if (analytics.invoked) {
-        window.console && console.error && console.error("Segment snippet included twice.");
-      } else {
-        analytics.invoked = !0;
-        analytics.methods = ["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];
-        analytics.factory = function(e){
-          return function(){
-            var t = Array.prototype.slice.call(arguments);
-            t.unshift(e);
-            analytics.push(t);
-            return analytics;
-          }
-        };
-        for (var e = 0; e < analytics.methods.length; e++) {
-          var key = analytics.methods[e];
-          analytics[key] = analytics.factory(key);
-        }
-
-        analytics.load = function(key, e){
-          var t = document.createElement("script");
-          t.type = "text/javascript";
-          t.async = !0;
-          t.src = "https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";
-          var n = document.getElementsByTagName("script")[0];
-          n.parentNode.insertBefore(t, n);
-          analytics._loadOptions = e;
-        };
-
-        // Function to look up the write key based on the domain name
-        function getWriteKey() {
-          var domain = window.location.hostname;
-          var writeKeys = {
-            "vendors.theknot.com": "7uNVcxnOSBpg3EinntFqHEo4Dqna4EEO",
-            "landing.hitched.co.uk": "JAx81AikCaWgsRfRFmx6RBz953eGVHqH",
-            "vendors.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
-            "partecipazioni.matrimonio.com": "UCwS4l4zqdAIKlM4Osi7cvGFD6RfCoTL"
-            // Add more domain-key pairs as needed
-          };
-          console.log(domain);
-          // Check if the domain exists in the writeKeys object
-          if (writeKeys.hasOwnProperty(domain)) {
-            return writeKeys[domain];
-          } else {
-            // If the domain is not found, return a fallback key
-            return "XeEJN55FrsKZFzBKqtu6wqnWRaZmXoKK";
-          }
-        }
-
-        analytics._writeKey = getWriteKey();
-        analytics.SNIPPET_VERSION = "4.15.3";
-        analytics.load(analytics._writeKey);
-        analytics.page('Page Viewed');
-      }
-    }
-  }();
-
-
-// Collect the data for the Order Completed Event
 // Function to extract data from the HTML and set it in localStorage
 function extractDataAndSetLocalStorage() {
   var products = [];
@@ -112,7 +46,8 @@ function extractDataAndSetLocalStorage() {
   });
 
   // Extract the total from the table
-  var total = document.querySelectorAll('table.table-bordered tfoot td.text-right')[1].textContent.trim();
+  var totalElement = document.querySelectorAll('table.table-bordered tfoot td.text-right')[1];
+  var total = totalElement ? totalElement.textContent.trim() : '0,00€';
 
   // Prepare the data for localStorage
   var data = {
@@ -148,7 +83,7 @@ if (currentURL.indexOf(targetPath) !== -1) {
     var checkoutButton = document.querySelector('#quick-checkout-button-confirm');
     if (checkoutButton) {
       console.log('Button found.');
-      
+
       // Add event listener once button is found
       checkoutButton.addEventListener('click', function() {
         extractDataAndSetLocalStorage();
@@ -159,11 +94,7 @@ if (currentURL.indexOf(targetPath) !== -1) {
     } else {
       console.log('Button not found.');
     }
-  }, 1000); 
-}
-
-
-
+  }, 1000);
 } else {
   console.log("Consent is not granted");
 }
