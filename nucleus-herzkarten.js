@@ -85,6 +85,72 @@ if (isConsentGranted()) {
     }
   }();
 
+
+// Collect the data for the Order Completed Event
+function extractDataAndSetLocalStorage() {
+  var products = [];
+
+  // Loop through each product row in the table
+  var productRows = document.querySelectorAll('table.table-bordered tbody tr');
+  productRows.forEach(function(row) {
+    var product = {
+      product_id: '', // You may need to fetch this from your backend or database
+      sku: row.querySelector('.td-model').textContent.trim(),
+      category: '', // You may need to fetch this based on the product
+      name: row.querySelector('.td-product a').textContent.trim(),
+      brand: '', // You may need to fetch this based on the product
+      variant: row.querySelector('.td-product small').textContent.trim(),
+      price: parseFloat(row.querySelector('.td-price').textContent.replace('€', '').trim()),
+      quantity: parseInt(row.querySelector('.td-qty select').value), // Assuming it's a dropdown
+      coupon: '', // You may need to fetch this based on the product
+      position: Array.from(row.parentNode.children).indexOf(row) + 1, // Position in the list
+      url: row.querySelector('.td-product a').href,
+      image_url: row.querySelector('.td-image img').src
+    };
+    products.push(product);
+  });
+
+  // Extract the total from the table
+  var total = document.querySelectorAll('table.table-bordered tfoot td.text-right')[1].textContent.trim();
+
+  // Prepare the data for localStorage
+  var data = {
+    checkout_id: '', // You may need to generate this
+    order_id: '', // You may need to generate this
+    affiliation: '', // Store or affiliation
+    subtotal: 0, // Not available from HTML
+    total: parseFloat(total.replace('€', '').trim()), // Total price
+    revenue: 0, // Not available from HTML
+    shipping: 0, // Not available from HTML
+    tax: 0, // Not available from HTML
+    discount: 0, // Not available from HTML
+    coupon: '', // Not available from HTML
+    currency: 'EUR',
+    products: products
+  };
+
+  // Set the data in localStorage
+  localStorage.setItem('order_completed_data', JSON.stringify(data));
+
+  console.log('Order data stored in localStorage.');
+}
+
+// Event listener for the "COMPLETA L'ORDINE" button
+document.getElementById('quick-checkout-button-confirm').addEventListener('click', function() {
+  extractDataAndSetLocalStorage();
+});
+
+// Check if the current URL path matches /index.php?route=checkout/checkout
+var currentURL = window.location.href;
+var targetPath = '/index.php?route=checkout/checkout';
+
+if (currentURL.indexOf(targetPath) !== -1) {
+  // Execute the extraction and storage code
+  extractDataAndSetLocalStorage();
+}
+
+
+
 } else {
   console.log("Consent is not granted");
 }
