@@ -1,3 +1,40 @@
+function getOptanonConsentCookie() {
+  var name = "OptanonConsent=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var cookieArray = decodedCookie.split(';');
+  for(var i = 0; i < cookieArray.length; i++) {
+    var cookie = cookieArray[i].trim();
+    if (cookie.indexOf(name) === 0) {
+      return cookie.substring(name.length, cookie.length);
+    }
+  }
+  return "";
+}
+
+// Function to check if consent is granted based on the OptanonConsent cookie
+function isConsentGranted() {
+  var optanonConsent = getOptanonConsentCookie();
+  if (optanonConsent.indexOf("C0002:1") !== -1) {
+    return true; // "C0002:1" is present, consent is granted
+  } else {
+    return false; // "C0002:1" is not present, consent is not granted
+  }
+}
+
+// for now, we're only tracking anaylytics, so we need to check for other groups in the future version
+
+const debugMode = getCookie('debug_mode');
+const isDebugMode = debugMode === 'true';
+
+if (isDebugMode) {
+	console.log('Debug mode enabled');
+}
+
+
+// Example usage
+if (isConsentGranted()) {
+  console.log("Consent is granted");
+	
 !function(){
     var analytics = window.analytics = window.analytics || [];
     
@@ -60,10 +97,11 @@
     }
   }();
 
-const debugMode = getCookie('debug_mode');
-const isDebugMode = debugMode === 'true';
 
-if (isDebugMode) {
-	console.log('Debug mode enabled');
+
+
+
+
+} else {
+  console.log("Consent is not granted");
 }
-  
