@@ -65,6 +65,8 @@ if (isConsentGranted()) {
             "landing.hitched.co.uk": "JAx81AikCaWgsRfRFmx6RBz953eGVHqH",
             "partecipazioni.matrimonio.com": "UCwS4l4zqdAIKlM4Osi7cvGFD6RfCoTL",
             "invitaciones.bodas.net": "Bq9n4AZAeEfmME1kEVHiBk48EcdCnokQ",
+            "stationery.hitched.co.uk": "jMNFTfZh0MzGJz0KxHXw3QHegspGYHTX",
+            "faire-part.mariages.net": "atorMnFUKsiVU4kFkAL1FmUgJeYD9p7C"
             "vendors.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC"
             // Add more domain-key pairs as needed
           };
