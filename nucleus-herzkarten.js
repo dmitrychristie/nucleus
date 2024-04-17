@@ -29,41 +29,26 @@ function isConsentGranted() {
 // anonymousId stitching 
 
 // Function to get the root domain from the current URL
-function getRootDomain() {
-  let domain = document.domain;
-  const parts = domain.split('.').reverse();
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
   
-  // Check if the domain is an IP address
-  const isIPAddress = /^\d+\.\d+\.\d+\.\d+$/.test(domain);
-  
-  // If it's an IP address, return it
-  if (isIPAddress) return domain;
-  
-  // If the domain is localhost, return it
-  if (domain === 'localhost') return domain;
-  
-  // Futureproofing with common TLDs
-  const commonTLDs = ['com', 'org', 'net', 'io', 'co', 'uk', 'us', 'ca', 'au', 'fr',  'in', 'br', 'mx', 'es', 'ar', 'ch', 'se', 'no', 'fi', 'dk', 'be', 'at', 'cz', 'pl', 'gr', 'pt'];
-
-  if (parts.length > 2 && commonTLDs.includes(parts[0])) {
-    domain = parts.slice(1).join('.');
-  } else {
-    domain = parts.join('.');
+  // If cookie not found, check for the cookie in the current domain
+  const currentDomain = window.location.hostname;
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name + '=') && cookie.endsWith(`domain=${currentDomain}`)) {
+      return cookie.split('=')[1];
+    }
   }
-  return domain;
 }
 
-// Function to get the anonymous ID from the root domain
-function getAnonymousId() {
-  const rootDomain = getRootDomain();
-  const anonymousId = document.cookie
-    .split('; ')
-    .find(row => row.startsWith(`${rootDomain}_anonymous_id=`))
-    ?.split('=')[1];
-  console.log('Anonymous recieved from the root domain');
-  console.log(anonymousId);
-  return anonymousId;
-}
+// Call the function with the cookie name
+const cookieValue = getCookie('ajs_anonymous_id');
+console.log(cookieValue);
+
 
 // Function to set the anonymous ID for the root domain and subdomains
 function setAnonymousId(anonymousId) {
