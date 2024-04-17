@@ -1,3 +1,5 @@
+// Consent handling
+
 function getOptanonConsentCookie() {
   var name = "OptanonConsent=";
   var decodedCookie = decodeURIComponent(document.cookie);
@@ -20,6 +22,70 @@ function isConsentGranted() {
     return false; // "C0002:1" is not present, consent is not granted
   }
 }
+
+/// END Consent handling
+
+
+// anonymousId stitching 
+
+// Function to get the root domain from the current URL
+function getRootDomain() {
+  let domain = document.domain;
+  const parts = domain.split('.').reverse();
+  
+  // Check if the domain is an IP address
+  const isIPAddress = /^\d+\.\d+\.\d+\.\d+$/.test(domain);
+  
+  // If it's an IP address, return it
+  if (isIPAddress) return domain;
+  
+  // If the domain is localhost, return it
+  if (domain === 'localhost') return domain;
+  
+  // Futureproofing with common TLDs
+  const commonTLDs = ['com', 'org', 'net', 'io', 'co', 'uk', 'us', 'ca', 'au', 'fr',  'in', 'br', 'mx', 'es', 'ar', 'ch', 'se', 'no', 'fi', 'dk', 'be', 'at', 'cz', 'pl', 'gr', 'pt'];
+
+  if (parts.length > 2 && commonTLDs.includes(parts[0])) {
+    domain = parts.slice(1).join('.');
+  } else {
+    domain = parts.join('.');
+  }
+  
+  return domain;
+}
+
+// Function to get the anonymous ID from the root domain
+function getAnonymousId() {
+  const rootDomain = getRootDomain();
+  const anonymousId = document.cookie
+    .split('; ')
+    .find(row => row.startsWith(`${rootDomain}_anonymous_id=`))
+    ?.split('=')[1];
+  
+  return anonymousId;
+}
+
+// Function to set the anonymous ID for the root domain and subdomains
+function setAnonymousId(anonymousId) {
+  const rootDomain = getRootDomain();
+  document.cookie = `${rootDomain}_anonymous_id=${anonymousId}; domain=.${rootDomain}; path=/;`;
+}
+
+
+function setAnonymousIdWrapper() {
+  const existingAnonymousId = getAnonymousId();
+  if (existingAnonymousId) {
+    setAnonymousId(existingAnonymousId);
+    console.log("Using existing anonymous ID from root domain:", existingAnonymousId);
+  }
+}
+
+
+
+// END anonymousId stitching
+
+
+
 
 // Example usage
 if (isConsentGranted()) {
@@ -83,7 +149,9 @@ if (isConsentGranted()) {
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
-        analytics.page('Page Viewed');
+        analytics.page();
+        setAnonymousIdWrapper();
+        
       }
     }
   }();
