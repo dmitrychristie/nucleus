@@ -50,7 +50,6 @@ function getRootDomain() {
   } else {
     domain = parts.join('.');
   }
-  
   return domain;
 }
 
@@ -61,7 +60,7 @@ function getAnonymousId() {
     .split('; ')
     .find(row => row.startsWith(`${rootDomain}_anonymous_id=`))
     ?.split('=')[1];
-  
+  console.log('Anonymous recieved from the root domain');
   return anonymousId;
 }
 
@@ -69,6 +68,7 @@ function getAnonymousId() {
 function setAnonymousId(anonymousId) {
   const rootDomain = getRootDomain();
   document.cookie = `${rootDomain}_anonymous_id=${anonymousId}; domain=.${rootDomain}; path=/;`;
+  console.log('Anonymous ID is set for the root domain');
 }
 
 
@@ -156,30 +156,7 @@ if (isConsentGranted()) {
     }
   }();
 
-var currentURL = window.location.href;
-var targetPath = '/index.php?route=checkout/checkout';
 
-if (currentURL.indexOf(targetPath) !== -1) {
-  console.log('On the checkout page. Ready to extract data.');
-
-  // Check for the button every second
-  var checkButtonInterval = setInterval(function() {
-    var checkoutButton = document.querySelector('#quick-checkout-button-confirm');
-    if (checkoutButton) {
-      console.log('Button found.');
-
-      // Add event listener once button is found
-      checkoutButton.addEventListener('click', function() {
-        extractDataAndSetLocalStorage();
-      });
-
-      // Clear the interval since we found the button
-      clearInterval(checkButtonInterval);
-    } else {
-      console.log('Button not found.');
-    }
-  }, 1000);
-}
 
 } else {
   console.log("Consent is not granted");
