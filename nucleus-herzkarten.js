@@ -45,26 +45,32 @@ function getCookie(name) {
   }
 }
 
-// Call the function with the cookie name
-const cookieValue = getCookie('ajs_anonymous_id');
-console.log(cookieValue);
-
-
-// Function to set the anonymous ID for the root domain and subdomains
 function setAnonymousId(anonymousId) {
   const rootDomain = getRootDomain();
   document.cookie = `${rootDomain}_anonymous_id=${anonymousId}; domain=.${rootDomain}; path=/;`;
   console.log('Anonymous ID is set for the root domain');
 }
 
-
 function setAnonymousIdWrapper() {
-  const existingAnonymousId = getAnonymousId();
+  const existingAnonymousId = getCookie('ajs_anonymous_id');
   if (existingAnonymousId) {
     setAnonymousId(existingAnonymousId);
     console.log("Using existing anonymous ID from root domain:", existingAnonymousId);
+    return existingAnonymousId;
   }
 }
+
+// Function to get the root domain
+function getRootDomain() {
+  let domainParts = window.location.hostname.split('.');
+  if (domainParts.length > 2) {
+    return domainParts.slice(-2).join('.');
+  }
+  return window.location.hostname;
+}
+
+// Call the setAnonymousIdWrapper function to set the anonymousId
+const anonymousId = setAnonymousIdWrapper();
 
 
 
@@ -135,9 +141,12 @@ if (isConsentGranted()) {
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
-        analytics.page();
-        setAnonymousIdWrapper();
-        
+        if (anonymousId) {
+          analytics.page({}, { anonymousId: anonymousId });
+        } else {
+          analytics.page();
+        }
+                
       }
     }
   }();
