@@ -61,6 +61,7 @@ function getAnonymousId() {
     .find(row => row.startsWith(`${rootDomain}_anonymous_id=`))
     ?.split('=')[1];
   console.log('Anonymous recieved from the root domain');
+  console.log(anonymousId);
   return anonymousId;
 }
 
