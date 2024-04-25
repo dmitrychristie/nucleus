@@ -101,12 +101,12 @@ if (isDebugMode) {
   
 window.onload = function () {
   try {
-   
     const formValuesCache = {};
 
-    const form = document.querySelector('.lp-pom-form form');
+    // Select forms with both CSS selectors
+    const allForms = document.querySelectorAll('.lp-pom-form form, your-other-selector form');
 
-    if (form) {
+    allForms.forEach((form) => {
       form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
 
       // Add an event listener to each input field for real-time updates
@@ -121,9 +121,7 @@ window.onload = function () {
           }
         });
       });
-    } else {
-      console.warn("Form element not found.");
-    }
+    });
 
   } catch (error) {
     console.error('Error initializing form tracking:', error);
