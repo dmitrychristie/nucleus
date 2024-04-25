@@ -1,6 +1,6 @@
 // Function to handle messages from the iframe
 function receiveMessageFromIframe(event) {
-    if (event.origin !== 'https://go.weddingpro.com') {
+    if (event.origin !== 'https://go.weddingpro.com' && event.origin !== 'https://pros.weddingpro.com') {
         console.error('Received message from invalid origin:', event.origin);
         return;
     }
@@ -13,6 +13,7 @@ function receiveMessageFromIframe(event) {
         pushDataLayerEvent(event.data);
     }
 }
+
 
 // Listen for messages from the iframe
 window.addEventListener('message', receiveMessageFromIframe);
