@@ -44,6 +44,39 @@
 
 	 analytics.addSourceMiddleware(addBuildProduct);
 
+	var addGA4Properties = function ({ payload, next, integrations }) {
+	    if (!payload.obj.context) {
+		payload.obj.context = {};
+	    }
+	
+	    function getCookieValue(cookieName) {
+		const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
+		return document.cookie.replace(cookiePattern, "$1");
+	    }
+	
+	    // Add ga4_client_id from cookie
+	    const ga4ClientId = getCookieValue('_ga');
+	    if (ga4ClientId) {
+		payload.obj.context.ga4_client_id = ga4ClientId.split('.').slice(-2).join('.');
+	    }
+	
+	    // Add ga4_session_id from cookie
+	    const ga4SessionId = getCookieValue('_ga');
+	    if (ga4SessionId) {
+		payload.obj.context.ga4_session_id = ga4SessionId.split('.').slice(2, 3).join('.');
+	    }
+	
+	    // Add ga4_session_number from cookie
+	    const ga4SessionNumber = getCookieValue('_ga');
+	    if (ga4SessionNumber) {
+		payload.obj.context.ga4_session_number = Number(ga4SessionNumber.split('.').slice(-1)[0]);
+	    }
+	
+	    next(payload);
+	};
+
+	analytics.addSourceMiddleware(addGA4Properties);
+
 	
         // Function to look up the write key based on the domain name
       function getWriteKey() {
