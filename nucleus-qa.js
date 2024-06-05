@@ -60,7 +60,6 @@
     }
   }();
 
-
   
 // Segment Events  
   
