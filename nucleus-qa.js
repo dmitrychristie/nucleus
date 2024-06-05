@@ -31,7 +31,17 @@
           n.parentNode.insertBefore(t, n);
           analytics._loadOptions = e;
         };
-        
+
+	var addNucleusProduct = function ({ payload, next, integrations }) {
+	    if (!payload.obj.context) {
+		payload.obj.context = {};
+	    }
+	    if (typeof window.nucleusProduct !== 'undefined') {
+		payload.obj.context.nucleusProduct = window.nucleusProduct;
+	    }
+	    next(payload);
+	};
+	
         // Function to look up the write key based on the domain name
       function getWriteKey() {
         var domain = window.location.hostname;
