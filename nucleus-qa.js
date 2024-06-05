@@ -32,7 +32,7 @@
           analytics._loadOptions = e;
         };
 
-	var addNucleusProduct = function ({ payload, next, integrations }) {
+	var addBuildProduct = function ({ payload, next, integrations }) {
 	    if (!payload.obj.context) {
 		payload.obj.context = {};
 	    }
@@ -41,6 +41,9 @@
 	    }
 	    next(payload);
 	};
+
+	 analytics.addSourceMiddleware(addBuildProduct);
+
 	
         // Function to look up the write key based on the domain name
       function getWriteKey() {
