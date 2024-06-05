@@ -37,7 +37,7 @@
 		payload.obj.context = {};
 	    }
 	    if (typeof window.nucleusProduct !== 'undefined') {
-		payload.obj.context.nucleusProduct = window.nucleusProduct;
+		payload.obj.properties.build_product = window.nucleusProduct;
 	    }
 	    next(payload);
 	};
