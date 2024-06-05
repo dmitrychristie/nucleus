@@ -101,7 +101,9 @@
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
-        analytics.page('Page Viewed');
+        analytics.page('Page Viewed', {
+	  non_interaction: true
+	});
       }
     }
   }();
@@ -181,6 +183,7 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_description: formElement.dataset.formDescription,
         form_location: document.location.pathname,
         form_result: 'success',
+	non_interaction: false,
         _fbc: fbcCookie || null, // Add _fbc property with the value from the fbcCookie
         _fbp: fbpCookie || null, // Add _fbp property with the value from the fbpCookie
       },
