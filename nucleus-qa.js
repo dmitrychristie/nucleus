@@ -60,12 +60,7 @@
     }
   }();
 
-const debugMode = getCookie('debug_mode');
-const isDebugMode = debugMode === 'true';
 
-if (isDebugMode) {
-	console.log('Debug mode enabled');
-}
   
 // Segment Events  
   
