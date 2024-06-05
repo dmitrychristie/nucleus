@@ -55,7 +55,7 @@
             function getGA4Properties() {
                 function getCookie(name) {
                     let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-                    if (match) return match[2];
+                    return match ? match[2] : null;
                 }
                 
                 var ga4ClientId = getCookie('_ga');
@@ -63,26 +63,31 @@
                 var ga4SessionNumber = getCookie('_ga_sn');
                 
                 return {
-                    ga4_client_id: ga4ClientId ? ga4ClientId.match(/\d{9,}\.\d*/)[0] : null,
-                    ga4_session_id: ga4SessionId ? ga4SessionId.match(/\d{9,}/)[0] : null,
-                    ga4_session_number: ga4SessionNumber ? ga4SessionNumber.match(/\d{9,}/)[0] : null
+                    ga4_client_id: ga4ClientId ? ga4ClientId.match(/\d{9,}\.\d*/)?.[0] : null,
+                    ga4_session_id: ga4SessionId ? ga4SessionId.match(/\d{9,}/)?.[0] : null,
+                    ga4_session_number: ga4SessionNumber ? ga4SessionNumber.match(/\d{9,}/)?.[0] : null
                 };
             }
 
             // Add middleware to include GA4 properties
             analytics.addSourceMiddleware(function(event, next) {
-                var ga4Properties = getGA4Properties();
-                event.properties = event.properties || {};
-                if (ga4Properties.ga4_client_id) {
-                    event.properties.ga4_client_id = ga4Properties.ga4_client_id;
+                try {
+                    var ga4Properties = getGA4Properties();
+                    event.properties = event.properties || {};
+                    if (ga4Properties.ga4_client_id) {
+                        event.properties.ga4_client_id = ga4Properties.ga4_client_id;
+                    }
+                    if (ga4Properties.ga4_session_id) {
+                        event.properties.ga4_session_id = ga4Properties.ga4_session_id;
+                    }
+                    if (ga4Properties.ga4_session_number) {
+                        event.properties.ga4_session_number = ga4Properties.ga4_session_number;
+                    }
+                    next(event);
+                } catch (error) {
+                    console.error("Error in Source Middleware: ", error);
+                    next(event);
                 }
-                if (ga4Properties.ga4_session_id) {
-                    event.properties.ga4_session_id = ga4Properties.ga4_session_id;
-                }
-                if (ga4Properties.ga4_session_number) {
-                    event.properties.ga4_session_number = ga4Properties.ga4_session_number;
-                }
-                next(event);
             });
 
             analytics._writeKey = getWriteKey();
@@ -92,6 +97,7 @@
         }
     }
 }();
+
 
 
   
