@@ -57,19 +57,19 @@
 	    // Add ga4_client_id from cookie
 	    const ga4ClientId = getCookieValue('_ga');
 	    if (ga4ClientId) {
-		payload.obj.context.ga4_client_id = ga4ClientId.split('.').slice(-2).join('.');
+		payload.obj.properties.ga4_client_id = ga4ClientId.split('.').slice(-2).join('.');
 	    }
 	
 	    // Add ga4_session_id from cookie
 	    const ga4SessionId = getCookieValue('_ga');
 	    if (ga4SessionId) {
-		payload.obj.context.ga4_session_id = ga4SessionId.split('.').slice(2, 3).join('.');
+		payload.obj.properties.ga4_session_id = ga4SessionId.split('.').slice(2, 3).join('.');
 	    }
 	
 	    // Add ga4_session_number from cookie
 	    const ga4SessionNumber = getCookieValue('_ga');
 	    if (ga4SessionNumber) {
-		payload.obj.context.ga4_session_number = Number(ga4SessionNumber.split('.').slice(-1)[0]);
+		payload.obj.properties.ga4_session_number = Number(ga4SessionNumber.split('.').slice(-1)[0]);
 	    }
 	
 	    next(payload);
