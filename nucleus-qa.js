@@ -148,7 +148,58 @@ const formFieldTraitMapping = [
   { inputName: 'phone_number', traitName: 'phone' },
   { inputName: 'company', traitName: 'company' },
   { inputName: 'country', traitName: 'country' },
+  { inputName: 'input_1.3', traitName: 'firstName' },
+  { inputName: 'input_1.6', traitName: 'lastName' },
+  { inputName: 'input_2', traitName: 'email' },
+  { inputName: 'input_5', traitName: 'phone' },
+  { inputName: 'input_17', traitName: 'company' },
+  { inputName: 'input_20', traitName: 'country' },
 ];
+
+
+// Helper functions for transformations
+const trimWhitespace = (value) => value.trim();
+const toLowerCase = (value) => value.toLowerCase();
+const removeSymbols = (value) => value.replace(/[^a-zA-Z0-9]/g, '');
+const removeLeadingZeros = (value) => value.replace(/^0+/, '');
+const formatPhoneNumber = (phone, countryCode = '1') => {
+  const cleaned = removeSymbols(phone);
+  const formatted = removeLeadingZeros(cleaned);
+  return `${countryCode}${formatted}`;
+};
+
+const normalizeValue = (value, key) => {
+  if (!value) return null;
+
+  value = trimWhitespace(value);
+
+  switch (key) {
+    case 'firstName':
+    case 'lastName':
+    case 'city':
+    case 'state':
+    case 'zipCode':
+    case 'country':
+      value = toLowerCase(value);
+      break;
+    case 'phone':
+      value = formatPhoneNumber(value); // Assume '1' as default country code for the example
+      break;
+    case 'email':
+      value = value.toLowerCase();
+      break;
+    case 'dateOfBirth':
+      value = value.replace(/[^0-9]/g, ''); // Keep only digits
+      break;
+    case 'gender':
+      value = value.charAt(0).toLowerCase(); // Use first character
+      break;
+    default:
+      break;
+  }
+
+  return value;
+};
   
 const fbcCookie = getCookie('_fbc');
 const fbpCookie = getCookie('_fbp');
