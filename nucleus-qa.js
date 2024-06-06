@@ -210,8 +210,12 @@ const formSubmittedTrack = (event, formValuesCache) => {
     const traits = {};
 
     // Map form field values to traits based on formFieldTraitMapping
-    formFieldTraitMapping.forEach((mapping) => {
-      traits[mapping.traitName] = formValuesCache[mapping.inputName] || null;
+   formFieldTraitMapping.forEach((mapping) => {
+      let value = formValuesCache[mapping.inputName] || null;
+      if (value) {
+        value = normalizeValue(value, mapping.traitName);
+      }
+      traits[mapping.traitName] = value;
     });
 
     // Call the identify function from Segment with only traits
