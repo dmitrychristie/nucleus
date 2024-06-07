@@ -118,7 +118,7 @@ window.onload = function () {
 
     // Get all forms on the page
     const forms = document.querySelectorAll('form');
-	if (forms) {
+	
 	      forms.forEach((form) => {
 	      form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
 	
@@ -135,7 +135,7 @@ window.onload = function () {
 	        });
 	      });
 	    });
-	}
+	
   
 
   } catch (error) {
