@@ -44,6 +44,22 @@
 
 	 analytics.addSourceMiddleware(addBuildProduct);
 
+	var addPlatform = function ({ payload, next, integrations }) {
+	    if (!payload.obj.context) {
+	        payload.obj.context = {};
+	    }
+	
+	    const userAgent = payload.obj.context?.userAgent?.toLowerCase() || '';
+	    const platform = /mobi/.test(userAgent) ? 'mobile web' : 'desktop web';
+	
+	    payload.obj.properties.platform = platform;
+	
+	    next(payload);
+	};
+	
+	// Add the middleware to the analytics instance
+	analytics.addSourceMiddleware(addPlatform);
+
 	var addGA4Properties = function ({ payload, next, integrations }) {
 	    if (!payload.obj.context) {
 		payload.obj.context = {};
