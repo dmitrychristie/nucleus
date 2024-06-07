@@ -1,32 +1,3 @@
-// Function to handle messages from the iframe
-function receiveMessageFromIframe(event) {
-    if (event.origin !== 'https://go.weddingpro.com' && event.origin !== 'https://pros.weddingpro.com') {
-        console.error('Received message from invalid origin:', event.origin);
-        return;
-    }
-    // Display the received message
-    console.log('Message received from iframe:', event.data);
-
-    // Trigger the same event in the parent window
-    if (event.data && event.data.event === 'b2bFormSubmission') {
-        console.log('attempting to push the data layer event');        
-        pushDataLayerEvent(event.data);
-    }
-}
-
-
-// Listen for messages from the iframe
-window.addEventListener('message', receiveMessageFromIframe);
-
-// Function to push a dataLayer event
-function pushDataLayerEvent(data) {
-    // Push the received data to the dataLayer
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(data);
-}
-
-// Core Project Nucleus
-
 !function(){
     var analytics = window.analytics = window.analytics || [];
     
@@ -60,7 +31,69 @@ function pushDataLayerEvent(data) {
           n.parentNode.insertBefore(t, n);
           analytics._loadOptions = e;
         };
-        
+
+	var addBuildProduct = function ({ payload, next, integrations }) {
+	    if (!payload.obj.context) {
+		payload.obj.context = {};
+	    }
+	    if (typeof window.nucleusProduct !== 'undefined') {
+		payload.obj.properties.build_product = window.nucleusProduct;
+	    }
+	    next(payload);
+	};
+
+	 analytics.addSourceMiddleware(addBuildProduct);
+
+	var addPlatform = function ({ payload, next, integrations }) {
+	    if (!payload.obj.context) {
+	        payload.obj.context = {};
+	    }
+	
+	    const userAgent = payload.obj.context?.userAgent?.toLowerCase() || '';
+	    const platform = /mobi/.test(userAgent) ? 'mobile web' : 'desktop web';
+	
+	    payload.obj.properties.platform = platform;
+	
+	    next(payload);
+	};
+	
+	// Add the middleware to the analytics instance
+	analytics.addSourceMiddleware(addPlatform);
+
+	var addGA4Properties = function ({ payload, next, integrations }) {
+	    if (!payload.obj.context) {
+		payload.obj.context = {};
+	    }
+	
+	    function getCookieValue(cookieName) {
+		const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
+		return document.cookie.replace(cookiePattern, "$1");
+	    }
+	
+	    // Add ga4_client_id from cookie
+	    const ga4ClientId = getCookieValue('_ga');
+	    if (ga4ClientId) {
+		payload.obj.properties.ga4_client_id = ga4ClientId.split('.').slice(-2).join('.');
+	    }
+	
+	    // Add ga4_session_id from cookie
+	    const ga4SessionId = getCookieValue('_ga');
+	    if (ga4SessionId) {
+		payload.obj.properties.ga4_session_id = ga4SessionId.split('.').slice(2, 3).join('.');
+	    }
+	
+	    // Add ga4_session_number from cookie
+	    const ga4SessionNumber = getCookieValue('_ga');
+	    if (ga4SessionNumber) {
+		payload.obj.properties.ga4_session_number = Number(ga4SessionNumber.split('.').slice(-1)[0]);
+	    }
+	
+	    next(payload);
+	};
+
+	analytics.addSourceMiddleware(addGA4Properties);
+
+	
         // Function to look up the write key based on the domain name
       function getWriteKey() {
         var domain = window.location.hostname;
@@ -68,7 +101,6 @@ function pushDataLayerEvent(data) {
 		"vendors.theknot.com": "7uNVcxnOSBpg3EinntFqHEo4Dqna4EEO",
 		"landing.hitched.co.uk": "JAx81AikCaWgsRfRFmx6RBz953eGVHqH",
 		"vendors.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
-		"pros.weddingpro.com": "Scko6NfkLryer27iA7jqDaDYhw0JueFh",
 	
           // Add more domain-key pairs as needed
         };
@@ -85,17 +117,14 @@ function pushDataLayerEvent(data) {
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
-        analytics.page('Page Viewed');
+        analytics.page('Page Viewed', {
+	  non_interaction: true
+	});
       }
     }
   }();
 
-const debugMode = getCookie('debug_mode');
-const isDebugMode = debugMode === 'true';
 
-if (isDebugMode) {
-	console.log('Debug mode enabled');
-}
   
 // Segment Events  
   
@@ -103,10 +132,10 @@ window.onload = function () {
   try {
     const formValuesCache = {};
 
-    // Select forms with both CSS selectors
-    const allForms = document.querySelectorAll('.lp-pom-form form, your-other-selector form');
+    // Get all forms on the page
+    const forms = document.querySelectorAll('form');
 
-    allForms.forEach((form) => {
+    forms.forEach((form) => {
       form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
 
       // Add an event listener to each input field for real-time updates
@@ -135,24 +164,75 @@ const formFieldTraitMapping = [
   { inputName: 'phone_number', traitName: 'phone' },
   { inputName: 'company', traitName: 'company' },
   { inputName: 'country', traitName: 'country' },
+  { inputName: 'input_1.3', traitName: 'firstName' },
+  { inputName: 'input_1.6', traitName: 'lastName' },
+  { inputName: 'input_2', traitName: 'email' },
+  { inputName: 'input_5', traitName: 'phone' },
+  { inputName: 'input_17', traitName: 'company' },
+  { inputName: 'input_20', traitName: 'country' },
 ];
-  
+
+
+// Helper functions for transformations
+const trimWhitespace = (value) => value.trim();
+const toLowerCase = (value) => value.toLowerCase();
+const removeSymbols = (value) => value.replace(/[^a-zA-Z0-9]/g, '');
+const removeLeadingZeros = (value) => value.replace(/^0+/, '');
+const formatPhoneNumber = (phone, countryCode = '1') => {
+  const cleaned = removeSymbols(phone);
+  const formatted = removeLeadingZeros(cleaned);
+  return `${countryCode}${formatted}`;
+};
+
+const normalizeValue = (value, key) => {
+  if (!value) return null;
+
+  value = trimWhitespace(value);
+
+  switch (key) {
+    case 'firstName':
+    case 'lastName':
+    case 'city':
+    case 'state':
+    case 'zipCode':
+    case 'country':
+      value = toLowerCase(value);
+      break;
+    case 'phone':
+      value = formatPhoneNumber(value); // Assume '1' as default country code for the example
+      break;
+    case 'email':
+      value = value.toLowerCase();
+      break;
+    case 'dateOfBirth':
+      value = value.replace(/[^0-9]/g, ''); // Keep only digits
+      break;
+    case 'gender':
+      value = value.charAt(0).toLowerCase(); // Use first character
+      break;
+    default:
+      break;
+  }
+
+  return value;
+};
   
 const fbcCookie = getCookie('_fbc');
 const fbpCookie = getCookie('_fbp');
   
-
 const formSubmittedTrack = (event, formValuesCache) => {
   try {
     const formElement = event.target;
-    const traits = {
-      firstName: formValuesCache['first_name'] || null,
-      lastName: formValuesCache['last_name'] || null,
-      email: formValuesCache['email'] || null,
-      phone: formValuesCache['phone_number'] || null,
-      company: formValuesCache['company'] || null,
-      country: formValuesCache['country'] || null,
-    };
+    const traits = {};
+
+    // Map form field values to traits based on formFieldTraitMapping
+   formFieldTraitMapping.forEach((mapping) => {
+      let value = formValuesCache[mapping.inputName] || null;
+      if (value) {
+        value = normalizeValue(value, mapping.traitName);
+      }
+      traits[mapping.traitName] = value;
+    });
 
     // Call the identify function from Segment with only traits
     analytics.identify(traits);
@@ -168,6 +248,7 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_description: formElement.dataset.formDescription,
         form_location: document.location.pathname,
         form_result: 'success',
+        non_interaction: false,
         _fbc: fbcCookie || null, // Add _fbc property with the value from the fbcCookie
         _fbp: fbpCookie || null, // Add _fbp property with the value from the fbpCookie
       },
@@ -180,6 +261,7 @@ const formSubmittedTrack = (event, formValuesCache) => {
     console.error('Error handling form submission:', error);
   }
 };
+
 
   
 function getCookie(cookieName) {
@@ -226,3 +308,8 @@ function getCookie(cookieName) {
 
   return null;
 }
+
+
+
+
+
