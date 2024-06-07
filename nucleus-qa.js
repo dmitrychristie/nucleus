@@ -118,25 +118,23 @@ window.onload = function () {
 
     // Get all forms on the page
     const forms = document.querySelectorAll('form');
-	
-	      forms.forEach((form) => {
-	      form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
-	
-	      // Add an event listener to each input field for real-time updates
-	      const inputFields = form.querySelectorAll('input, textarea, select');
-	      inputFields.forEach((inputField) => {
-	        inputField.addEventListener('input', () => {
-	          // Only update the cache if the input value is not empty
-	          if (inputField.value.trim() !== '') {
-	            // Update the cache with the latest value
-	            formValuesCache[inputField.name] = inputField.value;
-	            console.log('Updated Form Values:', formValuesCache);
-	          }
-	        });
-	      });
-	    });
-	
-  
+
+    forms.forEach((form) => {
+      form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
+
+      // Add an event listener to each input field for real-time updates
+      const inputFields = form.querySelectorAll('input, textarea, select');
+      inputFields.forEach((inputField) => {
+        inputField.addEventListener('input', () => {
+          // Only update the cache if the input value is not empty
+          if (inputField.value.trim() !== '') {
+            // Update the cache with the latest value
+            formValuesCache[inputField.name] = inputField.value;
+            console.log('Updated Form Values:', formValuesCache);
+          }
+        });
+      });
+    });
 
   } catch (error) {
     console.error('Error initializing form tracking:', error);
@@ -294,7 +292,3 @@ function getCookie(cookieName) {
 
   return null;
 }
-
-
-
-
