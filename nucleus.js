@@ -44,6 +44,10 @@
 
 	 analytics.addSourceMiddleware(addBuildProduct);
 
+	      let nucleusGA4MeasurementIdExists = window.nucleusGA4MeasurementId;
+
+	      if (nucleusGA4MeasurementIdExists) {
+
 	const addGA4Properties = ({ payload, next, integrations }) => {
 	    payload.obj.context = payload.obj.context || {};
 	    let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
@@ -117,7 +121,7 @@
 
 analytics.addSourceMiddleware(addGA4Properties);
 
-
+	      }
 
 
 
