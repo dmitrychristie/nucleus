@@ -83,7 +83,7 @@
 	        // Extract session ID and session number from GA4 cookie
 	        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
 	
-	        if (sessionId) {
+	        if (ids.sessionId) {
 	            payload.obj.properties.ga4_session_id = ids.sessionId;
 	        }
 	
