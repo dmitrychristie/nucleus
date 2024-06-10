@@ -71,7 +71,7 @@
 		    function extractIds(cookieValue) {
 		    var ids = cookieValue.split('.');
 		    return {
-		        clientId: ids[1] . '.' + ids[5],
+		        clientId: ids[1] + '.' + ids[5],
 		        sessionId: ids[2]
 		    };
 		}
