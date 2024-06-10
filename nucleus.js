@@ -67,13 +67,24 @@
 	    };
 	        // Get the GA cookie value
 	        const ga4CookieValue = getCookieValue(ga4CookieName);
-	        console.log("GA Cookie Value:", ga4CookieValue);
+
+		    function extractIds(cookieValue) {
+		    var ids = cookieValue.split('.');
+		    return {
+		        clientId: ids[1],
+		        sessionId: ids[2]
+		    };
+		}
+
+
+		var ids = extractIds(ga4CookieValue);
+	       
 		   
 	        // Extract session ID and session number from GA4 cookie
 	        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
 	
 	        if (sessionId) {
-	            payload.obj.properties.ga4_session_id = sessionId;
+	            payload.obj.properties.ga4_session_id = ids.sessionId;
 	        }
 	
 	        const sessionNum = extractSessionNumber(ga4CookieValue);
