@@ -100,8 +100,8 @@
 	        if (ids.sessionId) {
 	            payload.obj.properties.ga4_session_id = ids.sessionId;
 	        }
-		if (ids.clientId) {
-			            payload.obj.properties.ga4_client_id = ids.clientId;
+		if (clientId) {
+			            payload.obj.properties.ga4_client_id = clientId;
 		}
 
 		    
