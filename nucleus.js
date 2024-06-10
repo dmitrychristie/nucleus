@@ -58,23 +58,33 @@
 		return Number(cookieValue.split('.').slice(-1)[0]);
 	    };
 	
+	    // Obtain GA4 Measurement ID from global variable
+	    const ga4MeasurementId = window.nucleusGA4MeasurementId;
+	
 	    // Add GA4 client ID from cookie
-	    const ga4ClientId = getCookieValue('_ga');
+	    const gaCookieName = '_ga'; // Change this to the desired cookie name
+	    const ga4ClientId = getCookieValue(gaCookieName);
 	    if (ga4ClientId) {
 		payload.obj.properties.ga4_client_id = ga4ClientId.split('.').slice(-2).join('.');
 	    }
 	
 	    // Add GA4 session ID from cookie
-	    const ga4SessionId = getCookieValue('_ga');
+	    const ga4SessionId = getCookieValue(gaCookieName);
 	    if (ga4SessionId) {
 		payload.obj.properties.ga4_session_id = ga4SessionId.split('.').slice(2, 3).join('.');
 	    }
 	
 	    // Add GA4 session number from cookie
-	    const ga4SessionNumber = getCookieValue('_ga');
+	    const ga4SessionNumber = getCookieValue(gaCookieName);
 	    if (ga4SessionNumber) {
 		payload.obj.properties.ga4_session_number = extractSessionNumber(ga4SessionNumber);
+	    } else {
+		// Handle case where the session number is not available
+		console.log("Cookie", gaCookieName, "not found. Waiting to try again..");
 	    }
+	
+	    // Add GA4 Measurement ID to the payload
+	    payload.obj.properties.ga4_measurement_id = ga4MeasurementId;
 	
 	    next(payload);
 	};
