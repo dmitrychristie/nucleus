@@ -97,6 +97,7 @@ analytics.addSourceMiddleware(addGA4Properties);
 
 
 
+
 	
         // Function to look up the write key based on the domain name
       function getWriteKey() {
