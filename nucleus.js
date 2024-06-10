@@ -47,8 +47,13 @@
 	const addGA4Properties = ({ payload, next, integrations }) => {
     // Ensure context object exists
     payload.obj.context = payload.obj.context || {};
-    const nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+    let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+
     console.log(nucleusGA4MeasurementId);
+
+	nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(1);
+		console.log(nucleusGA4MeasurementId);
+
 
     const getCookieValue = (cookieName) => {
         const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
