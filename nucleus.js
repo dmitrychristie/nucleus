@@ -51,6 +51,21 @@
     nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(1);
     console.log(nucleusGA4MeasurementId);
 
+	function get_ga_clientid() {
+	  var cookie = {};
+	  document.cookie.split(';').forEach(function(el) {
+	    var splitCookie = el.split('=');
+	    var key = splitCookie[0].trim();
+	    var value = splitCookie[1];
+	    cookie[key] = value;
+	  });
+	return cookie["_ga"].substring(6);
+	}
+	let ga4ClientId = get_ga_clientid();
+		
+	if (ga4ClientId) {
+            payload.obj.properties.ga4_client_id = ga4ClientId;
+        }
  
 
     const extractSessionNumber = (cookieValue) => {
@@ -64,24 +79,11 @@
         // Get the GA cookie value
         const ga4CookieValue = getCookieValue(ga4CookieName);
         console.log("GA Cookie Value:", ga4CookieValue);
-	   const get_ga_clientid = () => {
-	        var cookie = {};
-	        document.cookie.split(';').forEach(function(el) {
-	            var splitCookie = el.split('=');
-	            var key = splitCookie[0].trim();
-	            var value = splitCookie[1];
-	            cookie[key] = value;
-	        });
-	        return cookie["_ga"].substring(6);
-	    };
- 	const ga4ClientId = get_ga_clientid();
-	console.log(ga4ClientId);
+	   
         // Extract session ID and session number from GA4 cookie
         const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
 
-        if (ga4ClientId) {
-            payload.obj.properties.ga4_client_id = ga4ClientId;
-        }
+        
 
         if (sessionId) {
             payload.obj.properties.ga4_session_id = sessionId;
