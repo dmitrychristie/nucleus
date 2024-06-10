@@ -45,41 +45,41 @@
 	 analytics.addSourceMiddleware(addBuildProduct);
 
 	const addGA4Properties = ({ payload, next, integrations }) => {
-    payload.obj.context = payload.obj.context || {};
-    let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
-    console.log(nucleusGA4MeasurementId);
-    nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(1);
-    console.log(nucleusGA4MeasurementId);
-
+	    payload.obj.context = payload.obj.context || {};
+	    let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+	    console.log(nucleusGA4MeasurementId);
+	    nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(1);
+	    console.log(nucleusGA4MeasurementId);
 	
-
-    const extractSessionNumber = (cookieValue) => {
-        return Number(cookieValue.split('.')[3]);
-    };
-
-    if (nucleusGA4MeasurementId) {
-        const ga4CookieName = `_ga${nucleusGA4MeasurementId.replace(/-/g, '_')}`;
-        console.log("Constructed Cookie Name:", ga4CookieName);
-       
-        // Get the GA cookie value
-        const ga4CookieValue = getCookieValue(ga4CookieName);
-        console.log("GA Cookie Value:", ga4CookieValue);
-	   
-        // Extract session ID and session number from GA4 cookie
-        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
-
-        if (sessionId) {
-            payload.obj.properties.ga4_session_id = sessionId;
-        }
-
-        const sessionNum = extractSessionNumber(ga4CookieValue);
-        if (!isNaN(sessionNum)) {
-            payload.obj.properties.ga4_session_number = sessionNum;
-        }
-    }
-
-    next(payload);
-};
+		
+	
+	    const extractSessionNumber = (cookieValue) => {
+	        return Number(cookieValue.split('.')[3]);
+	    };
+	
+	    if (nucleusGA4MeasurementId) {
+	        const ga4CookieName = `_ga${nucleusGA4MeasurementId}`;
+	        console.log("Constructed Cookie Name:", ga4CookieName);
+	       
+	        // Get the GA cookie value
+	        const ga4CookieValue = getCookieValue(ga4CookieName);
+	        console.log("GA Cookie Value:", ga4CookieValue);
+		   
+	        // Extract session ID and session number from GA4 cookie
+	        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
+	
+	        if (sessionId) {
+	            payload.obj.properties.ga4_session_id = sessionId;
+	        }
+	
+	        const sessionNum = extractSessionNumber(ga4CookieValue);
+	        if (!isNaN(sessionNum)) {
+	            payload.obj.properties.ga4_session_number = sessionNum;
+	        }
+	    }
+	
+	    next(payload);
+	};
 
 analytics.addSourceMiddleware(addGA4Properties);
 
