@@ -47,9 +47,10 @@
 	const addGA4Properties = ({ payload, next, integrations }) => {
 	    // Ensure context object exists
 	    payload.obj.context = payload.obj.context || {};
+		const nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
 	
-	    const getCookieValue = (measurementId) => {
-	        const cookieName = `_ga_${measurementId.replace(/-/g, '_')}`;
+	    const getCookieValue = (nucleusGA4MeasurementId) => {
+	        const cookieName = `_ga_${nucleusGA4MeasurementId.replace(/-/g, '_')}`;
 	        const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
 	        return document.cookie.replace(cookiePattern, "$1");
 	    };
@@ -59,7 +60,7 @@
 	        return Number(cookieValue.split('.').slice(-1)[0]);
 	    };
 	
-	    const nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+	    
 	    if (nucleusGA4MeasurementId) {
 	        // Add GA4 client ID from cookie
 	        const ga4ClientId = getCookieValue(nucleusGA4MeasurementId);
