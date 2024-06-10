@@ -86,6 +86,11 @@
 	        if (ids.sessionId) {
 	            payload.obj.properties.ga4_session_id = ids.sessionId;
 	        }
+		if (ids.clientId) {
+			            payload.obj.properties.ga4_client_id = ids.clientId;
+		}
+
+		    
 	
 	        const sessionNum = extractSessionNumber(ga4CookieValue);
 	        if (!isNaN(sessionNum)) {
