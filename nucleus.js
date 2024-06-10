@@ -48,6 +48,7 @@
 	    // Ensure context object exists
 	    payload.obj.context = payload.obj.context || {};
 		const nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+		console.log(nucleusGA4MeasurementId);
 	
 	    const getCookieValue = (nucleusGA4MeasurementId) => {
 	        const cookieName = `_ga_${nucleusGA4MeasurementId.replace(/-/g, '_')}`;
