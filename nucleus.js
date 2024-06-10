@@ -92,7 +92,7 @@
 		return cookie["_ga"].substring(6);
 		}
 	       
-		let clientId = get_ga_clientId();
+		let clientId = get_ga_clientid();
 		   
 	        // Extract session ID and session number from GA4 cookie
 	        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
