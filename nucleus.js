@@ -61,7 +61,10 @@
 	    if (nucleusGA4MeasurementId) {
 	        const ga4CookieName = `_ga${nucleusGA4MeasurementId}`;
 	        console.log("Constructed Cookie Name:", ga4CookieName);
-	       
+	         const getCookieValue = (cookieName) => {
+		const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
+		return document.cookie.replace(cookiePattern, "$1");
+	    };
 	        // Get the GA cookie value
 	        const ga4CookieValue = getCookieValue(ga4CookieName);
 	        console.log("GA Cookie Value:", ga4CookieValue);
