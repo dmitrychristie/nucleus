@@ -85,7 +85,7 @@
 		"vendors.theknot.com": "7uNVcxnOSBpg3EinntFqHEo4Dqna4EEO",
 		"landing.hitched.co.uk": "JAx81AikCaWgsRfRFmx6RBz953eGVHqH",
 		"vendors.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
-		"landing.bodas.net": "3FYOBBJG62r3nuZdyJloRLdLU3mlMjrY",
+		"landing.bodas.net": "5BAtHFm8T7Ymq1GjecaP13EOeabFRCPM",
 	
           // Add more domain-key pairs as needed
         };
