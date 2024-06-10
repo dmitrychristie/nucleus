@@ -48,7 +48,8 @@
 	    payload.obj.context = payload.obj.context || {};
 	    let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
 	    console.log(nucleusGA4MeasurementId);
-	    nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(1);
+	    nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(2);
+	nucleusGA4MeasurementId = '_' + nucleusGA4MeasurementId;
 	    console.log(nucleusGA4MeasurementId);
 	
 		
