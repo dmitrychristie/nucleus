@@ -71,7 +71,7 @@
 		    function extractIds(cookieValue) {
 		    var ids = cookieValue.split('.');
 		    return {
-		        clientId: ids[2] + '.' + ids[5],
+		        
 		        sessionId: ids[2]
 		    };
 		}
@@ -80,7 +80,19 @@
 
 
 		var ids = extractIds(ga4CookieValue);
+
+		    function get_ga_clientid() {
+		  var cookie = {};
+		  document.cookie.split(';').forEach(function(el) {
+		    var splitCookie = el.split('=');
+		    var key = splitCookie[0].trim();
+		    var value = splitCookie[1];
+		    cookie[key] = value;
+		  });
+		return cookie["_ga"].substring(6);
+		}
 	       
+		let clientId = get_ga_clientId();
 		   
 	        // Extract session ID and session number from GA4 cookie
 	        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
