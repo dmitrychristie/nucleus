@@ -71,10 +71,12 @@
 		    function extractIds(cookieValue) {
 		    var ids = cookieValue.split('.');
 		    return {
-		        clientId: ids[1],
+		        clientId: ids[1] . '.' + ids[5],
 		        sessionId: ids[2]
 		    };
 		}
+
+		    
 
 
 		var ids = extractIds(ga4CookieValue);
