@@ -48,36 +48,42 @@
 	    // Ensure context object exists
 	    payload.obj.context = payload.obj.context || {};
 	
-	    const getCookieValue = (cookieName) => {
-		const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
-		return document.cookie.replace(cookiePattern, "$1");
+	    const getCookieValue = (measurementId) => {
+	        const cookieName = `_ga_${measurementId.replace(/-/g, '_')}`;
+	        const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
+	        return document.cookie.replace(cookiePattern, "$1");
 	    };
 	
 	    // Function to extract session number from GA cookie
 	    const extractSessionNumber = (cookieValue) => {
-		return Number(cookieValue.split('.').slice(-1)[0]);
+	        return Number(cookieValue.split('.').slice(-1)[0]);
 	    };
 	
-	    // Add GA4 client ID from cookie
-	    const ga4ClientId = getCookieValue('_ga');
-	    if (ga4ClientId) {
-		payload.obj.properties.ga4_client_id = ga4ClientId.split('.').slice(-2).join('.');
-	    }
+	    const nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+	    if (nucleusGA4MeasurementId) {
+	        // Add GA4 client ID from cookie
+	        const ga4ClientId = getCookieValue(nucleusGA4MeasurementId);
+	        if (ga4ClientId) {
+	            payload.obj.properties.ga4_client_id = ga4ClientId.split('.').slice(-2).join('.');
+	        }
 	
-	    // Add GA4 session ID from cookie
-	    const ga4SessionId = getCookieValue('_ga');
-	    if (ga4SessionId) {
-		payload.obj.properties.ga4_session_id = ga4SessionId.split('.').slice(2, 3).join('.');
-	    }
+	        // Add GA4 session ID from cookie
+	        const ga4SessionId = getCookieValue(nucleusGA4MeasurementId);
+	        if (ga4SessionId) {
+	            payload.obj.properties.ga4_session_id = ga4SessionId.split('.').slice(2, 3).join('.');
+	        }
 	
-	    // Add GA4 session number from cookie
-	    const ga4SessionNumber = getCookieValue('_ga');
-	    if (ga4SessionNumber) {
-		payload.obj.properties.ga4_session_number = extractSessionNumber(ga4SessionNumber);
+	        // Add GA4 session number from cookie
+	        const ga4SessionNumber = getCookieValue(nucleusGA4MeasurementId);
+	        if (ga4SessionNumber) {
+	            payload.obj.properties.ga4_session_number = extractSessionNumber(ga4SessionNumber);
+	        }
 	    }
 	
 	    next(payload);
 	};
+analytics.addSourceMiddleware(addGA4Properties);
+
 	analytics.addSourceMiddleware(addGA4Properties);
 
 	
