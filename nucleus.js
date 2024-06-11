@@ -135,8 +135,14 @@ analytics.addSourceMiddleware(addGA4Properties);
 		"vendors.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
 		"landing.bodas.net": "5BAtHFm8T7Ymq1GjecaP13EOeabFRCPM",
 		"landing.mariages.net": "AeOWbj8QkZ3NS0MiwBVjANFTi70hCCMI",
-		
-	
+		"landing.matrimonio.com": "Uvqhy9zLMpnhoCFzCz1oYIVFB7tiDJmz",
+		"landing.hitched.ie": "PmpoRVhqM8qGy3KzkemKkvERtHVjO4Pj",
+		"landing.bodas.com.mx": "cvBYtvnVbSuwGVWvGHuoa2e1hRfGUpGh",
+		"landing.matrimonios.cl": "yJYUIT5WttG3A55MsLrflD5JekxDX7Z4",
+		"landing.casamientos.com.ar": "Cm9lLLR3R7oVUnm55O28ypnlv07FoYdy",
+		"landing.casamentos.com.br": "wgyqDswuS7ybSLeu8it8ISEXzbZvO52a",
+		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
+		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",	
           // Add more domain-key pairs as needed
         };
 	console.log(domain);
