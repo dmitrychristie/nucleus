@@ -151,7 +151,7 @@ analytics.addSourceMiddleware(addGA4Properties);
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
         analytics.page('Page Viewed', {
-	  non_interaction: true
+	  non_interaction: false
 	});
       }
     }
