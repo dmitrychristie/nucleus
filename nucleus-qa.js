@@ -44,54 +44,86 @@
 
 	 analytics.addSourceMiddleware(addBuildProduct);
 
-	var addPlatform = function ({ payload, next, integrations }) {
-	    if (!payload.obj.context) {
-	        payload.obj.context = {};
-	    }
+	const addGA4Properties = ({ payload, next, integrations }) => {
+	    payload.obj.context = payload.obj.context || {};
+	    let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+	    console.log(nucleusGA4MeasurementId);
+	    nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(2);
+	nucleusGA4MeasurementId = '_' + nucleusGA4MeasurementId;
+	    console.log(nucleusGA4MeasurementId);
 	
-	    const userAgent = payload.obj.context?.userAgent?.toLowerCase() || '';
-	    const platform = /mobi/.test(userAgent) ? 'mobile web' : 'desktop web';
+		
 	
-	    payload.obj.properties.platform = platform;
+	    const extractSessionNumber = (cookieValue) => {
+	        return Number(cookieValue.split('.')[3]);
+	    };
 	
-	    next(payload);
-	};
-	
-	// Add the middleware to the analytics instance
-	analytics.addSourceMiddleware(addPlatform);
-
-	var addGA4Properties = function ({ payload, next, integrations }) {
-	    if (!payload.obj.context) {
-		payload.obj.context = {};
-	    }
-	
-	    function getCookieValue(cookieName) {
+	    if (nucleusGA4MeasurementId) {
+	        const ga4CookieName = `_ga${nucleusGA4MeasurementId}`;
+	        console.log("Constructed Cookie Name:", ga4CookieName);
+	         const getCookieValue = (cookieName) => {
 		const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
 		return document.cookie.replace(cookiePattern, "$1");
-	    }
+	    };
+	        // Get the GA cookie value
+	        const ga4CookieValue = getCookieValue(ga4CookieName);
+
+		    function extractIds(cookieValue) {
+		    var ids = cookieValue.split('.');
+		    return {
+		        
+		        sessionId: ids[2]
+		    };
+		}
+
+		    
+
+
+		var ids = extractIds(ga4CookieValue);
+
+		    function get_ga_clientid() {
+		  var cookie = {};
+		  document.cookie.split(';').forEach(function(el) {
+		    var splitCookie = el.split('=');
+		    var key = splitCookie[0].trim();
+		    var value = splitCookie[1];
+		    cookie[key] = value;
+		  });
+		return cookie["_ga"].substring(6);
+		}
+	       
+		let clientId = get_ga_clientid();
+		   
+	        // Extract session ID and session number from GA4 cookie
+	        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
 	
-	    // Add ga4_client_id from cookie
-	    const ga4ClientId = getCookieValue('_ga');
-	    if (ga4ClientId) {
-		payload.obj.properties.ga4_client_id = ga4ClientId.split('.').slice(-2).join('.');
-	    }
+	        if (ids.sessionId) {
+	            payload.obj.properties.ga4_session_id = ids.sessionId;
+	        }
+		if (clientId) {
+			            payload.obj.properties.ga4_client_id = clientId;
+		}
+
+		    
 	
-	    // Add ga4_session_id from cookie
-	    const ga4SessionId = getCookieValue('_ga');
-	    if (ga4SessionId) {
-		payload.obj.properties.ga4_session_id = ga4SessionId.split('.').slice(2, 3).join('.');
-	    }
-	
-	    // Add ga4_session_number from cookie
-	    const ga4SessionNumber = getCookieValue('_ga');
-	    if (ga4SessionNumber) {
-		payload.obj.properties.ga4_session_number = Number(ga4SessionNumber.split('.').slice(-1)[0]);
+	        const sessionNum = extractSessionNumber(ga4CookieValue);
+	        if (!isNaN(sessionNum)) {
+	            payload.obj.properties.ga4_session_number = sessionNum;
+	        }
 	    }
 	
 	    next(payload);
 	};
 
-	analytics.addSourceMiddleware(addGA4Properties);
+analytics.addSourceMiddleware(addGA4Properties);
+
+
+
+
+
+
+
+
 
 	
         // Function to look up the write key based on the domain name
@@ -101,7 +133,16 @@
 		"vendors.theknot.com": "7uNVcxnOSBpg3EinntFqHEo4Dqna4EEO",
 		"landing.hitched.co.uk": "JAx81AikCaWgsRfRFmx6RBz953eGVHqH",
 		"vendors.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
-	
+		"landing.bodas.net": "5BAtHFm8T7Ymq1GjecaP13EOeabFRCPM",
+		"landing.mariages.net": "AeOWbj8QkZ3NS0MiwBVjANFTi70hCCMI",
+		"landing.matrimonio.com": "Uvqhy9zLMpnhoCFzCz1oYIVFB7tiDJmz",
+		"landing.hitched.ie": "PmpoRVhqM8qGy3KzkemKkvERtHVjO4Pj",
+		"landing.bodas.com.mx": "cvBYtvnVbSuwGVWvGHuoa2e1hRfGUpGh",
+		"landing.matrimonios.cl": "yJYUIT5WttG3A55MsLrflD5JekxDX7Z4",
+		"landing.casamientos.com.ar": "Cm9lLLR3R7oVUnm55O28ypnlv07FoYdy",
+		"landing.casamentos.com.br": "wgyqDswuS7ybSLeu8it8ISEXzbZvO52a",
+		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
+		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",	
           // Add more domain-key pairs as needed
         };
 	console.log(domain);
@@ -118,7 +159,7 @@
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
         analytics.page('Page Viewed', {
-	  non_interaction: true
+	  non_interaction: false
 	});
       }
     }
@@ -308,8 +349,3 @@ function getCookie(cookieName) {
 
   return null;
 }
-
-
-
-
-
