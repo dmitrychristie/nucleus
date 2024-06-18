@@ -342,8 +342,15 @@ function handleLinkClick(event) {
 
     if (link) {
         const isExternal = link.classList.contains('nucleus-external-link');
+        let eventName = 'Link Clicked';
+        
+        // Check if the link or its parent elements contain 'cta' class
+        if (link.classList.contains('cta') || link.closest('.cta')) {
+            eventName = 'CTA clicked';
+        }
+
         const eventDetails = {
-            event: 'Link Clicked',
+            event: eventName,
             link_type: isExternal ? 'external' : 'internal',
             href: link.href
         };
@@ -355,11 +362,6 @@ function handleLinkClick(event) {
     }
 }
 
-// Function to fire the event (you can customize this as per your analytics setup)
-function fireEvent(details) {
-    console.log(details); // For debugging, you can replace this with actual event firing code
-   
-}
 
 // Tag external links on page load
 document.addEventListener('DOMContentLoaded', tagExternalLinks);
