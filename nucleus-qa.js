@@ -345,12 +345,13 @@ function handleLinkClick(event) {
         const eventDetails = {
             event: 'Link Clicked',
             link_type: isExternal ? 'external' : 'internal',
-	non_interaction: false
             href: link.href
         };
 
         // Fire the event (assuming a function 'fireEvent' is defined to handle this)
         fireEvent(eventDetails);
+    } else {
+        console.error('No link found for click event:', event);
     }
 }
 
