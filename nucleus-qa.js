@@ -362,6 +362,10 @@ function handleLinkClick(event) {
     }
 }
 
+function fireEvent(details) {
+    console.log(details); 
+  
+}
 
 // Tag external links on page load
 document.addEventListener('DOMContentLoaded', tagExternalLinks);
