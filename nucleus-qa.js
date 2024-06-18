@@ -345,8 +345,13 @@ function handleLinkClick(event) {
         let eventName = 'Link Clicked';
         
         // Check if the link or its parent elements contain 'cta' class
-        if (link.classList.contains('cta') || link.closest('.cta')) {
-            eventName = 'CTA clicked';
+        let element = link;
+        while (element) {
+            if (element.classList && element.classList.contains('cta')) {
+                eventName = 'CTA clicked';
+                break;
+            }
+            element = element.parentElement;
         }
 
         const eventDetails = {
