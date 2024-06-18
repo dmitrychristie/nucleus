@@ -367,9 +367,21 @@ function handleLinkClick(event) {
 
         // Fire the event (assuming a function 'fireEvent' is defined to handle this)
         fireEvent(eventDetails);
+	    
     } else {
         console.error('No link found for click event:', event);
     }
+}
+
+
+function fireEvent(details) {
+    console.log(details); // For debugging
+    
+    // Track the event with Segment
+    analytics.track(details.event, {
+        link_type: details.link_type,
+        href: details.href
+    });
 }
 
 // Tag external links on page load
