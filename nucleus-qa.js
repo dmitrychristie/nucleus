@@ -340,6 +340,11 @@ function tagExternalLinks() {
 function handleLinkClick(event) {
     const link = event.target.closest('a'); // Get the closest <a> element in case of nested elements
 
+    if (!link) {
+        // If the clicked element is not an <a> element, do nothing
+        return;
+    }
+
     if (link) {
         const isExternal = link.classList.contains('nucleus-external-link');
         let eventName = 'Link Clicked';
