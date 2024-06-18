@@ -368,8 +368,11 @@ function handleLinkClick(event) {
 }
 
 function fireEvent(details) {
-    console.log(details); 
-  
+    console.log(details); // For debugging
+    analytics.track(details.event, {
+        link_type: details.link_type,
+        href: details.href
+    });
 }
 
 // Tag external links on page load
