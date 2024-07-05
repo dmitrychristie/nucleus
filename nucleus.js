@@ -119,7 +119,15 @@ analytics.addSourceMiddleware(addGA4Properties);
 
 
 
+var generateEventId = function({ payload, next }) {
+          var eventId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+          payload.obj.properties = payload.obj.properties || {};
+          payload.obj.properties.event_id = eventId;
+          next(payload);
+        };
 
+        // Add the generateEventId middleware
+analytics.addSourceMiddleware(generateEventId);
 
 
 
