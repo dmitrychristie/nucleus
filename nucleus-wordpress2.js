@@ -145,7 +145,8 @@ analytics.addSourceMiddleware(addGA4Properties);
 		"landing.casamientos.com.ar": "Cm9lLLR3R7oVUnm55O28ypnlv07FoYdy",
 		"landing.casamentos.com.br": "wgyqDswuS7ybSLeu8it8ISEXzbZvO52a",
 		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
-		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",	
+		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",
+		"pros.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
           // Add more domain-key pairs as needed
         };
 	console.log(domain);
