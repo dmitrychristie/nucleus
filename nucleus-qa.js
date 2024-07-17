@@ -151,7 +151,7 @@ analytics.addSourceMiddleware(generateEventId);
 		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
 		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",
 		"pros.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
-          // Add more domain-key pairs as needed
+          // Add more domain-key pairs as needed 
         };
 	console.log(domain);
         // Check if the domain exists in the writeKeys object
