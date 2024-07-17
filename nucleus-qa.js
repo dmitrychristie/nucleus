@@ -133,7 +133,7 @@ analytics.addSourceMiddleware(generateEventId);
 
 
 	
-        // Function to look up the write key based on the domain name
+        // Function to look up the write key based on the domain name 
       function getWriteKey() {
         var domain = window.location.hostname;
         var writeKeys = {
