@@ -144,7 +144,7 @@ function addAnonymousIdMiddleware() {
         // Add anonymousId to event properties
         payload.obj.properties = {
           ...payload.obj.properties,
-          anonymousId: payload.obj.anonymousId,
+          segmentAnonymousId: payload.obj.anonymousId,
         };
 
         // Log the updated state for debugging
