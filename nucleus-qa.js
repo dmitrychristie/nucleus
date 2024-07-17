@@ -129,38 +129,41 @@ var generateEventId = function({ payload, next }) {
         // Add the generateEventId middleware
 analytics.addSourceMiddleware(generateEventId);
 
-  function getCookieAnonymousID(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-    }
+function addAnonymousIdMiddleware() {
+  return ({ payload, next }) => {
+    if (payload && payload.obj) {
+      // Log the current state for debugging
+      console.log('Original payload:', payload);
 
-    // Middleware function to add anonymous ID from cookies as an event property
-    function addAnonymousIdMiddleware() {
-      return function(chain) {
-        return function(payload, next) {
-          // Retrieve the anonymous ID from cookies
-          const GUEST_COOKIE = 'ajs_anonymous_id';
-          const anonymousId = getCookieAnonymousID(GUEST_COOKIE);
+      if (payload.obj.anonymousId) {
+        // Ensure properties is an object before attempting to spread
+        if (!payload.obj.properties) {
+          payload.obj.properties = {};
+        }
 
-          // If anonymous ID is found in cookies
-          if (anonymousId) {
-            // Ensure properties exist on the payload object
-            payload.obj.properties = payload.obj.properties || {};
-            
-            // Add anonymousId to event properties
-            payload.obj.properties.anonymousId = anonymousId;
-          }
-
-          // Pass the payload to the next middleware or destination
-          next(payload);
+        // Add anonymousId to event properties
+        payload.obj.properties = {
+          ...payload.obj.properties,
+          anonymousId: payload.obj.anonymousId,
         };
-      };
+
+        // Log the updated state for debugging
+        console.log('Updated payload:', payload);
+      }
+    } else {
+      console.error('Payload or payload.obj is missing:', payload);
     }
 
-// Register the middleware
-analytics.addSourceMiddleware(addAnonymousIdMiddleware());
+    // Pass the payload to the next middleware or destination
+    if (typeof next === 'function') {
+      next(payload);
+    } else {
+      console.error('Next is not a function:', next);
+    }
+  };
+}
 
+	      addSourceMiddleware(addAnonymousIdMiddleware());
 
 
 	
