@@ -129,7 +129,20 @@ var generateEventId = function({ payload, next }) {
         // Add the generateEventId middleware
 analytics.addSourceMiddleware(generateEventId);
 
+function addAnonymousIdMiddleware() {
+  return ({ payload, next }) => {
+    if (payload.obj && payload.obj.anonymousId) {
+      // Add anonymousId to event properties
+      payload.obj.properties = {
+        ...payload.obj.properties,
+        anonymousId: payload.obj.anonymousId,
+      };
+    next(payload);
+  };
+}
 
+// Register the middleware
+analytics.addSourceMiddleware(addAnonymousIdMiddleware());
 
 
 
