@@ -129,23 +129,36 @@ var generateEventId = function({ payload, next }) {
         // Add the generateEventId middleware
 analytics.addSourceMiddleware(generateEventId);
 
-function addAnonymousIdMiddleware() {
-  return function (chain) {
-    return function (payload, next) {
-      // Check if the payload is an event and has an anonymousId
-      if (payload.obj && payload.obj.anonymousId) {
-        // Ensure properties exist on the payload object
-        payload.obj.properties = payload.obj.properties || {};
-        
-        // Add anonymousId to event properties
-        payload.obj.properties.anonymousId = payload.obj.anonymousId;
-      }
-      
-      // Pass the payload to the next middleware or destination
-      next(payload);
-    };
-  };
-}
+   function addAnonymousIdMiddleware() {
+      return function(chain) {
+        return function(payload, next) {
+          // Retrieve the anonymous ID from cookies for the current domain
+          const GUEST_COOKIE = 'ajs_anonymous_id';
+          const domain = window.location.hostname;
+          const anonymousId = Cookies.withConverter({
+            read: function(value, name) {
+              // Read the cookie only if it matches the current domain
+              if (document.cookie.split('; ').find(row => row.startsWith(name)) && document.cookie.includes(`.${domain}`)) {
+                return value;
+              }
+              return undefined;
+            }
+          }).get(GUEST_COOKIE);
+
+          // If anonymous ID is found in cookies
+          if (anonymousId) {
+            // Ensure properties exist on the payload object
+            payload.obj.properties = payload.obj.properties || {};
+            
+            // Add anonymousId to event properties
+            payload.obj.properties.anonymousId = anonymousId;
+          }
+
+          // Pass the payload to the next middleware or destination
+          next(payload);
+        };
+      };
+    }
 
 // Register the middleware
 analytics.addSourceMiddleware(addAnonymousIdMiddleware());
