@@ -163,7 +163,7 @@ function addAnonymousIdMiddleware() {
   };
 }
 
-	      addSourceMiddleware(addAnonymousIdMiddleware());
+	      analytics.addSourceMiddleware(addAnonymousIdMiddleware());
 
 
 	
