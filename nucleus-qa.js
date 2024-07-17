@@ -129,21 +129,19 @@ var generateEventId = function({ payload, next }) {
         // Add the generateEventId middleware
 analytics.addSourceMiddleware(generateEventId);
 
-   function addAnonymousIdMiddleware() {
+  function getCookieAnonymousID(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+    // Middleware function to add anonymous ID from cookies as an event property
+    function addAnonymousIdMiddleware() {
       return function(chain) {
         return function(payload, next) {
-          // Retrieve the anonymous ID from cookies for the current domain
+          // Retrieve the anonymous ID from cookies
           const GUEST_COOKIE = 'ajs_anonymous_id';
-          const domain = window.location.hostname;
-          const anonymousId = Cookies.withConverter({
-            read: function(value, name) {
-              // Read the cookie only if it matches the current domain
-              if (document.cookie.split('; ').find(row => row.startsWith(name)) && document.cookie.includes(`.${domain}`)) {
-                return value;
-              }
-              return undefined;
-            }
-          }).get(GUEST_COOKIE);
+          const anonymousId = getCookieAnonymousID(GUEST_COOKIE);
 
           // If anonymous ID is found in cookies
           if (anonymousId) {
