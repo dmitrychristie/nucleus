@@ -119,7 +119,15 @@ analytics.addSourceMiddleware(addGA4Properties);
 
 
 
+var generateEventId = function({ payload, next }) {
+          var eventId = Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+          payload.obj.properties = payload.obj.properties || {};
+          payload.obj.properties.event_id = eventId;
+          next(payload);
+        };
 
+        // Add the generateEventId middleware
+analytics.addSourceMiddleware(generateEventId);
 
 
 
@@ -142,7 +150,8 @@ analytics.addSourceMiddleware(addGA4Properties);
 		"landing.casamientos.com.ar": "Cm9lLLR3R7oVUnm55O28ypnlv07FoYdy",
 		"landing.casamentos.com.br": "wgyqDswuS7ybSLeu8it8ISEXzbZvO52a",
 		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
-		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",	
+		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",
+		"pros.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
           // Add more domain-key pairs as needed
         };
 	console.log(domain);
@@ -302,93 +311,6 @@ const formSubmittedTrack = (event, formValuesCache) => {
     console.error('Error handling form submission:', error);
   }
 };
-
-
-
-// Function to check if the URL is external
-function isExternalLink(url, currentHost) {
-    const linkHostname = new URL(url).hostname;
-    // Split the hostnames into parts
-    const linkParts = linkHostname.split('.').reverse();
-    const currentParts = currentHost.split('.').reverse();
-    
-    // Determine the length of the shorter hostname parts
-    const length = Math.min(linkParts.length, currentParts.length);
-    
-    // Compare the parts of both hostnames
-    for (let i = 0; i < length; i++) {
-        if (linkParts[i] !== currentParts[i]) {
-            return true; // Part mismatch means the link is external
-        }
-    }
-    return false; // All parts match means the link is internal
-}
-
-// Function to add 'nucleus-external-link' class to external links
-function tagExternalLinks() {
-    const links = document.querySelectorAll('a'); // Select all links on the page
-    const hostname = window.location.hostname; // Get the current site's hostname
-
-    links.forEach(link => {
-        if (isExternalLink(link.href, hostname)) {
-            link.classList.add('nucleus-external-link'); // Add class if the link is external
-        }
-    });
-}
-
-// Function to handle link click events
-function handleLinkClick(event) {
-    const link = event.target.closest('a'); // Get the closest <a> element in case of nested elements
-
-    if (!link) {
-        // If the clicked element is not an <a> element, do nothing
-        return;
-    }
-
-    if (link) {
-        const isExternal = link.classList.contains('nucleus-external-link');
-        let eventName = 'Link Clicked';
-        
-        // Check if the link or its parent elements contain 'cta' class
-        let element = link;
-        while (element) {
-            if (element.classList && element.classList.contains('cta')) {
-                eventName = 'CTA clicked';
-                break;
-            }
-            element = element.parentElement;
-        }
-
-        const eventDetails = {
-            event: eventName,
-            link_type: isExternal ? 'external' : 'internal',
-            href: link.href
-        };
-
-        // Fire the event (assuming a function 'fireEvent' is defined to handle this)
-        fireEvent(eventDetails);
-	    
-    } else {
-        console.error('No link found for click event:', event);
-    }
-}
-
-
-function fireEvent(details) {
-    console.log(details); // For debugging
-    
-    // Track the event with Segment
-    analytics.track(details.event, {
-        link_type: details.link_type,
-        href: details.href
-    });
-}
-
-// Tag external links on page load
-document.addEventListener('DOMContentLoaded', tagExternalLinks);
-
-// Add click event listener to the whole document
-document.addEventListener('click', handleLinkClick);
 
 
   
