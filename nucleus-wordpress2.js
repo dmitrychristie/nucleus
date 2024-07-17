@@ -132,6 +132,41 @@ var generateEventId = function({ payload, next }) {
 analytics.addSourceMiddleware(generateEventId);
 
 
+function addAnonymousIdMiddleware() {
+  return ({ payload, next }) => {
+    if (payload && payload.obj) {
+      // Log the current state for debugging
+      console.log('Original payload:', payload);
+
+      if (payload.obj.anonymousId) {
+        // Ensure properties is an object before attempting to spread
+        if (!payload.obj.properties) {
+          payload.obj.properties = {};
+        }
+
+        // Add anonymousId to event properties
+        payload.obj.properties = {
+          ...payload.obj.properties,
+          segmentAnonymousId: payload.obj.anonymousId,
+        };
+
+        // Log the updated state for debugging
+        console.log('Updated payload:', payload);
+      }
+    } else {
+      console.error('Payload or payload.obj is missing:', payload);
+    }
+
+    // Pass the payload to the next middleware or destination
+    if (typeof next === 'function') {
+      next(payload);
+    } else {
+      console.error('Next is not a function:', next);
+    }
+  };
+}
+
+	      analytics.addSourceMiddleware(addAnonymousIdMiddleware());
 
 
 
