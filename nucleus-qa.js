@@ -131,18 +131,18 @@ analytics.addSourceMiddleware(generateEventId);
 
 function addAnonymousIdMiddleware() {
   return ({ payload, next }) => {
+    // Check if the payload is an event
     if (payload.obj && payload.obj.anonymousId) {
       // Add anonymousId to event properties
       payload.obj.properties = {
         ...payload.obj.properties,
         anonymousId: payload.obj.anonymousId,
       };
+    }
+    // Pass the payload to the next middleware or destination
     next(payload);
   };
 }
-
-// Register the middleware
-analytics.addSourceMiddleware(addAnonymousIdMiddleware());
 
 
 
