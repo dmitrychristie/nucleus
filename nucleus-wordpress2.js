@@ -1,4 +1,4 @@
-window.nucleusProduct = 'landing-pages';
+window.nucleusProduct = 'vendor-exprience';
 window.nucleusGA4MeasurementId = 'G-65C0Q5LMCM';
 
 !function(){
