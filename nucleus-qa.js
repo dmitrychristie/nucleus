@@ -65,7 +65,7 @@
 		const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
 		return document.cookie.replace(cookiePattern, "$1");
 	    };
-	        // Get the GA cookie value t
+	        // Get the GA cookie value
 	        const ga4CookieValue = getCookieValue(ga4CookieName);
 
 		    function extractIds(cookieValue) {
@@ -117,8 +117,6 @@
 
 analytics.addSourceMiddleware(addGA4Properties);
 
-	      //test
-
 
 
 var generateEventId = function({ payload, next }) {
@@ -135,7 +133,7 @@ analytics.addSourceMiddleware(generateEventId);
 
 
 	
-        // Function to look up the write key based on the domain name 
+        // Function to look up the write key based on the domain name
       function getWriteKey() {
         var domain = window.location.hostname;
         var writeKeys = {
@@ -153,8 +151,18 @@ analytics.addSourceMiddleware(generateEventId);
 		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
 		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",
 		"pros.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
-          // Add more domain-key pairs as needed 
+          // Add more domain-key pairs as needed
         };
+
+	 var sourceSettings = {
+                "vendors.theknot.com": { product: "vendor-experience", ga4: "G-65C0Q5LMCM" }
+            };
+
+            if (sourceSettings.hasOwnProperty(domain)) {
+                window.nucleusProduct = sourceSettings[domain].product;
+                window.nucleusGA4MeasurementId = sourceSettings[domain].ga4;
+            }
+	      
 	console.log(domain);
         // Check if the domain exists in the writeKeys object
         if (writeKeys.hasOwnProperty(domain)) {
