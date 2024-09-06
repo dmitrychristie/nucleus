@@ -1,3 +1,5 @@
+
+window.nucleusProduct = 'paper';
 // Consent handling
 
 function getOptanonConsentCookie() {
