@@ -1,5 +1,17 @@
 
 window.nucleusProduct = 'paper';
+var addBuildProduct = function ({ payload, next, integrations }) {
+	    if (!payload.obj.context) {
+		payload.obj.context = {};
+	    }
+	    if (typeof window.nucleusProduct !== 'undefined') {
+		payload.obj.properties.build_product = window.nucleusProduct;
+	    }
+	    next(payload);
+	};
+
+	 analytics.addSourceMiddleware(addBuildProduct);
+
 // Consent handling
 
 function getOptanonConsentCookie() {
