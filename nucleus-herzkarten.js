@@ -1,16 +1,6 @@
 
 window.nucleusProduct = 'paper';
-var addBuildProduct = function ({ payload, next, integrations }) {
-	    if (!payload.obj.context) {
-		payload.obj.context = {};
-	    }
-	    if (typeof window.nucleusProduct !== 'undefined') {
-		payload.obj.properties.build_product = window.nucleusProduct;
-	    }
-	    next(payload);
-	};
 
-	 analytics.addSourceMiddleware(addBuildProduct);
 
 // Consent handling
 
@@ -129,6 +119,17 @@ if (isConsentGranted()) {
           analytics._loadOptions = e;
         };
 
+	var addBuildProduct = function ({ payload, next, integrations }) {
+	    if (!payload.obj.context) {
+		payload.obj.context = {};
+	    }
+	    if (typeof window.nucleusProduct !== 'undefined') {
+		payload.obj.properties.build_product = window.nucleusProduct;
+	    }
+	    next(payload);
+	};
+
+	 analytics.addSourceMiddleware(addBuildProduct);
         // Function to look up the write key based on the domain name
         function getWriteKey() {
           var domain = window.location.hostname;
