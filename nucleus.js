@@ -150,7 +150,7 @@ analytics.addSourceMiddleware(generateEventId);
 		"landing.casamentos.com.br": "wgyqDswuS7ybSLeu8it8ISEXzbZvO52a",
 		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
 		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",
-		"pros.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
+		"pros.weddingpro.com": "Scko6NfkLryer27iA7jqDaDYhw0JueFh",
 		"theknotww.com": "UuP98lzDHr9SjV0GQyXPGEsS4O96OqPL",
           // Add more domain-key pairs as needed
         };
