@@ -350,6 +350,25 @@ formFieldTraitMapping.forEach((mapping) => {
     // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
+const email = formValuesCache.email || traits.email; 
+    if (email) {
+      let hashedEmail = ''; 
+      if (typeof CryptoJS !== 'undefined') {
+        try {
+          const wordArray = CryptoJS.enc.Utf8.parse(email);
+          const hash = CryptoJS.SHA256(wordArray);
+          hashedEmail = hash.toString(CryptoJS.enc.Hex); 
+        } catch (error) {
+          console.error('Error hashing email:', error);
+        }
+      } else {
+        // Fallback: Use a simple hashing method (not cryptographically secure)
+        // This is a basic example, replace with your preferred fallback logic
+        hashedEmail = simpleHash(email);
+	console.log(hashedEmail);
+      }
+    }
+
     // Track the form submission
     analytics.track(
       'Form Submitted',
@@ -363,6 +382,7 @@ formFieldTraitMapping.forEach((mapping) => {
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
+	hashed_email: hashedEmail,
         _fbc: fbcCookie || null,
         _fbp: fbpCookie || null,
       },
