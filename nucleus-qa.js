@@ -1,3 +1,14 @@
+const loadScript = (src) => {
+  const script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src = src;
+  document.head.appendChild(script);
+};
+
+// Load the hashing library async 
+loadScript('https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js');
+
+
 !function(){
     var analytics = window.analytics = window.analytics || [];
     
@@ -45,77 +56,98 @@
 	 analytics.addSourceMiddleware(addBuildProduct);
 
 	const addGA4Properties = ({ payload, next, integrations }) => {
-	    payload.obj.context = payload.obj.context || {};
-	    let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
-	    console.log(nucleusGA4MeasurementId);
-	    nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(2);
-	nucleusGA4MeasurementId = '_' + nucleusGA4MeasurementId;
-	    console.log(nucleusGA4MeasurementId);
-	
-		
-	
-	    const extractSessionNumber = (cookieValue) => {
-	        return Number(cookieValue.split('.')[3]);
-	    };
-	
-	    if (nucleusGA4MeasurementId) {
-	        const ga4CookieName = `_ga${nucleusGA4MeasurementId}`;
-	        console.log("Constructed Cookie Name:", ga4CookieName);
-	         const getCookieValue = (cookieName) => {
-		const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
-		return document.cookie.replace(cookiePattern, "$1");
-	    };
-	        // Get the GA cookie value
-	        const ga4CookieValue = getCookieValue(ga4CookieName);
+    try {
+        payload.obj.context = payload.obj.context || {};
+        
+        let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+        console.log(nucleusGA4MeasurementId);
 
-		    function extractIds(cookieValue) {
-		    var ids = cookieValue.split('.');
-		    return {
-		        
-		        sessionId: ids[2]
-		    };
-		}
+        // Make sure nucleusGA4MeasurementId is long enough before calling substring
+        if (nucleusGA4MeasurementId.length > 2) {
+            nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(2);
+        } else {
+            throw new Error("nucleusGA4MeasurementId is too short");
+        }
 
-		    
+        nucleusGA4MeasurementId = '_' + nucleusGA4MeasurementId;
+        console.log(nucleusGA4MeasurementId);
 
+        const extractSessionNumber = (cookieValue) => {
+            return Number(cookieValue.split('.')[3]);
+        };
 
-		var ids = extractIds(ga4CookieValue);
+        if (nucleusGA4MeasurementId) {
+            const ga4CookieName = `_ga${nucleusGA4MeasurementId}`;
+            console.log("Constructed Cookie Name:", ga4CookieName);
 
-		    function get_ga_clientid() {
-		  var cookie = {};
-		  document.cookie.split(';').forEach(function(el) {
-		    var splitCookie = el.split('=');
-		    var key = splitCookie[0].trim();
-		    var value = splitCookie[1];
-		    cookie[key] = value;
-		  });
-		return cookie["_ga"].substring(6);
-		}
-	       
-		let clientId = get_ga_clientid();
-		   
-	        // Extract session ID and session number from GA4 cookie
-	        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
-	
-	        if (ids.sessionId) {
-	            payload.obj.properties.ga4_session_id = ids.sessionId;
-	        }
-		if (clientId) {
-			            payload.obj.properties.ga4_client_id = clientId;
-		}
+            const getCookieValue = (cookieName) => {
+                const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
+                return document.cookie.replace(cookiePattern, "$1");
+            };
 
-		    
-	
-	        const sessionNum = extractSessionNumber(ga4CookieValue);
-	        if (!isNaN(sessionNum)) {
-	            payload.obj.properties.ga4_session_number = sessionNum;
-	        }
-	    }
-	
-	    next(payload);
-	};
+            // Get the GA cookie value
+            const ga4CookieValue = getCookieValue(ga4CookieName);
+            if (!ga4CookieValue) {
+                throw new Error("GA4 cookie not found");
+            }
+
+            function extractIds(cookieValue) {
+                var ids = cookieValue.split('.');
+                return {
+                    sessionId: ids[2]
+                };
+            }
+
+            var ids = extractIds(ga4CookieValue);
+
+            function get_ga_clientid() {
+                var cookie = {};
+                document.cookie.split(';').forEach(function (el) {
+                    var splitCookie = el.split('=');
+                    var key = splitCookie[0].trim();
+                    var value = splitCookie[1];
+                    cookie[key] = value;
+                });
+                if (cookie["_ga"]) {
+                    return cookie["_ga"].substring(6);
+                } else {
+                    throw new Error("GA client ID not found");
+                }
+            }
+
+            let clientId = get_ga_clientid();
+
+            // Extract session ID and session number from GA4 cookie
+            if (ga4CookieValue.split('.').length >= 4) {
+                const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
+            } else {
+                throw new Error("GA4 cookie is missing session information");
+            }
+
+            if (ids.sessionId) {
+                payload.obj.properties.ga4_session_id = ids.sessionId;
+            }
+
+            if (clientId) {
+                payload.obj.properties.ga4_client_id = clientId;
+            }
+
+            const sessionNum = extractSessionNumber(ga4CookieValue);
+            if (!isNaN(sessionNum)) {
+                payload.obj.properties.ga4_session_number = sessionNum;
+            }
+        }
+
+        next(payload);
+    } catch (error) {
+        console.error("Error in addGA4Properties:", error);
+        // Optionally, you can add any fallback behavior here or decide not to call next()
+        next(payload);  // Ensure `next` is called even if there's an error
+    }
+};
 
 analytics.addSourceMiddleware(addGA4Properties);
+
 
 
 
@@ -150,19 +182,10 @@ analytics.addSourceMiddleware(generateEventId);
 		"landing.casamentos.com.br": "wgyqDswuS7ybSLeu8it8ISEXzbZvO52a",
 		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
 		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",
-		"pros.weddingpro.com": "3EbqDEUfCdJ1kbQ4AgVilzIGLG9LG9IC",
+		"pros.weddingpro.com": "Scko6NfkLryer27iA7jqDaDYhw0JueFh",
+		"www.theknotww.com": "UuP98lzDHr9SjV0GQyXPGEsS4O96OqPL",
           // Add more domain-key pairs as needed
         };
-
-	 var sourceSettings = {
-                "vendors.theknot.com": { product: "vendor-experience", ga4: "G-65C0Q5LMCM" }
-            };
-
-            if (sourceSettings.hasOwnProperty(domain)) {
-                window.nucleusProduct = sourceSettings[domain].product;
-                window.nucleusGA4MeasurementId = sourceSettings[domain].ga4;
-            }
-	      
 	console.log(domain);
         // Check if the domain exists in the writeKeys object
         if (writeKeys.hasOwnProperty(domain)) {
@@ -208,6 +231,22 @@ window.onload = function () {
             console.log('Updated Form Values:', formValuesCache);
           }
         });
+      });
+ 	 // Capture the hidden field `Form_Type` in the cache
+      const hiddenField = form.querySelector('input[name="Form_Type"]');
+
+      if (hiddenField) {
+
+        formValuesCache[hiddenField.name] = hiddenField.value; // Initialize with the value
+
+      }
+
+      // Update the cache for hidden fields on form submission
+      form.addEventListener('submit', () => {
+        if (hiddenField) {
+          formValuesCache[hiddenField.name] = hiddenField.value; // Ensure it captures on submit
+        }
+
       });
     });
 
@@ -283,17 +322,32 @@ const formSubmittedTrack = (event, formValuesCache) => {
   try {
     const formElement = event.target;
     const traits = {};
+    let autofillDetected = false;
 
     // Map form field values to traits based on formFieldTraitMapping
-   formFieldTraitMapping.forEach((mapping) => {
-      let value = formValuesCache[mapping.inputName] || null;
-      if (value) {
-        value = normalizeValue(value, mapping.traitName);
-      }
-      traits[mapping.traitName] = value;
-    });
+formFieldTraitMapping.forEach((mapping) => {
+  // Get the value from the cache using the input name
+  let value = formValuesCache[mapping.inputName] || null;
+  console.log("Cache value for", mapping.inputName, ":", value);
 
-    // Call the identify function from Segment with only traits
+  // Normalize the value if it exists
+  if (value) {
+    value = normalizeValue(value, mapping.traitName);
+    console.log("Normalized value for", mapping.traitName, ":", value);
+  }
+
+  // Only add to traits if the value is not null
+  if (value) {
+    traits[mapping.traitName] = value;
+  } else {
+    console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
+  }
+});
+
+    // Log to check final traits structure
+    console.log("Final traits object to be sent to Segment:", traits);
+
+    // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
     // Track the form submission
@@ -304,12 +358,13 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_name: formElement.dataset.formName,
         form_type: formElement.dataset.formType,
         form_header: formElement.dataset.formHeader,
+        form_type: formValuesCache['Form_Type'],
         form_description: formElement.dataset.formDescription,
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
-        _fbc: fbcCookie || null, // Add _fbc property with the value from the fbcCookie
-        _fbp: fbpCookie || null, // Add _fbp property with the value from the fbpCookie
+        _fbc: fbcCookie || null,
+        _fbp: fbpCookie || null,
       },
       {
         traits,
@@ -320,7 +375,6 @@ const formSubmittedTrack = (event, formValuesCache) => {
     console.error('Error handling form submission:', error);
   }
 };
-
 
   
 function getCookie(cookieName) {
@@ -365,5 +419,69 @@ function getCookie(cookieName) {
     return foundCookie.split('=')[1];
   }
 
+// comment to trigger a new build job 
+
   return null;
 }
+
+
+// LINK and CTA Clicked
+
+// Define an array of CSS classes that would classify the link as a CTA
+const ctaClasses = ['cta', 'button', 'highlight', 'cta-learn-more']; // Add as many classes as needed
+
+// Function to check if an element or its parent has a CTA class
+const hasCTAClass = (element) => {
+  return ctaClasses.some((ctaClass) =>
+    element.classList.contains(ctaClass) ||
+    (element.parentElement && element.parentElement.classList.contains(ctaClass))
+  );
+};
+
+// Function to track event and navigate
+const trackEventAndNavigate = (eventName, properties, href, target) => {
+  return new Promise((resolve) => {
+    analytics.track(eventName, properties, resolve); // Resolve only after tracking is complete
+  }).then(() => {
+    // After tracking is complete, navigate to the link
+    if (target === '_blank') {
+      // Open in a new tab
+      window.open(href, '_blank');
+    } else {
+      // Navigate in the same tab
+      window.location.href = href;
+    }
+  });
+};
+
+// Event listener for link clicks
+document.addEventListener('click', (event) => {
+  const linkElement = event.target.closest('a'); // Find the nearest <a> element
+
+  if (linkElement) {
+    const href = linkElement.href;
+    const target = linkElement.target; // Capture the target attribute
+
+    // Determine link type
+    const linkType = linkElement.hostname === window.location.hostname ? 'internal' : 'external';
+
+    // Check if the link qualifies as a CTA based on the CSS classes
+    const isCTA = hasCTAClass(linkElement);
+
+    // Track either "CTA Clicked" or "Link Clicked"
+    const eventName = isCTA ? 'CTA Clicked' : 'Link Clicked';
+    const properties = {
+      link_type: linkType,
+      href: href,
+    };
+
+    if (target === '_blank' || event.ctrlKey || event.metaKey) {
+      // Allow default behavior for new tab or command/ctrl click
+      analytics.track(eventName, properties);
+    } else {
+      // Prevent immediate navigation and track before navigating
+      event.preventDefault();
+      trackEventAndNavigate(eventName, properties, href, target);
+    }
+  }
+});
