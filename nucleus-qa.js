@@ -428,10 +428,19 @@ formFieldTraitMapping.forEach((mapping) => {
 
 	let email = formValuesCache.email || traits.email; 
 	  
-    if (email) {
-      let hashedEmail = sha256(email) || false; 
-      console.log(hashedEmail); 
-    } 
+if (email) {
+  // Ensure sha256 function is called and result is stored in hashedEmail
+  let hashedEmail = sha256(email) || false; 
+  
+  // Check if hashedEmail is valid before using it
+  if (hashedEmail) {
+    console.log(hashedEmail);
+  } else {
+    console.log("Hashing failed or no valid result.");
+  }
+} else {
+  console.log("No email provided.");
+}
 
     // Track the form submission
     analytics.track(
