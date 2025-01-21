@@ -350,7 +350,8 @@ formFieldTraitMapping.forEach((mapping) => {
     // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
-/* const email = formValuesCache.email || traits.email; 
+	let email = formValuesCache.email || traits.email; 
+	  console.log(email);
     if (email) {
       let hashedEmail = ''; 
       if (typeof CryptoJS !== 'undefined') {
@@ -367,7 +368,7 @@ formFieldTraitMapping.forEach((mapping) => {
         hashedEmail = simpleHash(email);
 	console.log(hashedEmail);
       }
-    } */
+    } 
 
     // Track the form submission
     analytics.track(
