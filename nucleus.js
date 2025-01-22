@@ -1,3 +1,90 @@
+function sha256(ascii) {
+    function rightRotate(value, amount) {
+        return (value >>> amount) | (value << (32 - amount));
+    }
+
+    var mathPow = Math.pow;
+    var maxWord = mathPow(2, 32);
+    var lengthProperty = 'length';
+    var i, j;
+    var result = '';
+
+    var words = [];
+    var asciiBitLength = ascii[lengthProperty] * 8;
+
+    var hash = (sha256.h = sha256.h || []);
+    var k = (sha256.k = sha256.k || []);
+    var primeCounter = k[lengthProperty];
+
+    var isComposite = {};
+    for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+            for (i = 0; i < 313; i += candidate) {
+                isComposite[i] = candidate;
+            }
+            hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+            k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+        }
+    }
+
+    ascii += '\x80';
+    while ((ascii[lengthProperty] % 64) - 56) ascii += '\x00';
+    for (i = 0; i < ascii[lengthProperty]; i++) {
+        j = ascii.charCodeAt(i);
+        if (j >> 8) return;
+        words[i >> 2] |= j << (((3 - i) % 4) * 8);
+    }
+    words[words[lengthProperty]] = (asciiBitLength / maxWord) | 0;
+    words[words[lengthProperty]] = asciiBitLength;
+
+    for (j = 0; j < words[lengthProperty]; ) {
+        var w = words.slice(j, (j += 16));
+        var oldHash = hash;
+        hash = hash.slice(0, 8);
+
+        for (i = 0; i < 64; i++) {
+            var i2 = i + j;
+            var w15 = w[i - 15],
+                w2 = w[i - 2];
+
+            var a = hash[0],
+                e = hash[4];
+            var temp1 =
+                hash[7] +
+                (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
+                ((e & hash[5]) ^ (~e & hash[6])) +
+                k[i] +
+                (w[i] =
+                    i < 16
+                        ? w[i]
+                        : (w[i - 16] +
+                            (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+                            w[i - 7] +
+                            (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);
+            var temp2 =
+                (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
+                ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+            
+            hash = [(temp1 + temp2) | 0].concat(hash);
+            hash[4] = (hash[4] + temp1) | 0;
+        }
+
+        for (i = 0; i < 8; i++) {
+            hash[i] = (hash[i] + oldHash[i]) | 0;
+        }
+    }
+
+    for (i = 0; i < 8; i++) {
+        for (j = 3; j + 1; j--) {
+            var b = (hash[i] >> (j * 8)) & 255;
+            result += (b < 16 ? 0 : '') + b.toString(16);
+        }
+    }
+    return result;
+}
+
+
+
 !function(){
     var analytics = window.analytics = window.analytics || [];
     
@@ -45,77 +132,98 @@
 	 analytics.addSourceMiddleware(addBuildProduct);
 
 	const addGA4Properties = ({ payload, next, integrations }) => {
-	    payload.obj.context = payload.obj.context || {};
-	    let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
-	    console.log(nucleusGA4MeasurementId);
-	    nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(2);
-	nucleusGA4MeasurementId = '_' + nucleusGA4MeasurementId;
-	    console.log(nucleusGA4MeasurementId);
-	
-		
-	
-	    const extractSessionNumber = (cookieValue) => {
-	        return Number(cookieValue.split('.')[3]);
-	    };
-	
-	    if (nucleusGA4MeasurementId) {
-	        const ga4CookieName = `_ga${nucleusGA4MeasurementId}`;
-	        console.log("Constructed Cookie Name:", ga4CookieName);
-	         const getCookieValue = (cookieName) => {
-		const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
-		return document.cookie.replace(cookiePattern, "$1");
-	    };
-	        // Get the GA cookie value
-	        const ga4CookieValue = getCookieValue(ga4CookieName);
+    try {
+        payload.obj.context = payload.obj.context || {};
+        
+        let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+        console.log(nucleusGA4MeasurementId);
 
-		    function extractIds(cookieValue) {
-		    var ids = cookieValue.split('.');
-		    return {
-		        
-		        sessionId: ids[2]
-		    };
-		}
+        // Make sure nucleusGA4MeasurementId is long enough before calling substring
+        if (nucleusGA4MeasurementId.length > 2) {
+            nucleusGA4MeasurementId = nucleusGA4MeasurementId.substring(2);
+        } else {
+            throw new Error("nucleusGA4MeasurementId is too short");
+        }
 
-		    
+        nucleusGA4MeasurementId = '_' + nucleusGA4MeasurementId;
+        console.log(nucleusGA4MeasurementId);
 
+        const extractSessionNumber = (cookieValue) => {
+            return Number(cookieValue.split('.')[3]);
+        };
 
-		var ids = extractIds(ga4CookieValue);
+        if (nucleusGA4MeasurementId) {
+            const ga4CookieName = `_ga${nucleusGA4MeasurementId}`;
+            console.log("Constructed Cookie Name:", ga4CookieName);
 
-		    function get_ga_clientid() {
-		  var cookie = {};
-		  document.cookie.split(';').forEach(function(el) {
-		    var splitCookie = el.split('=');
-		    var key = splitCookie[0].trim();
-		    var value = splitCookie[1];
-		    cookie[key] = value;
-		  });
-		return cookie["_ga"].substring(6);
-		}
-	       
-		let clientId = get_ga_clientid();
-		   
-	        // Extract session ID and session number from GA4 cookie
-	        const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
-	
-	        if (ids.sessionId) {
-	            payload.obj.properties.ga4_session_id = ids.sessionId;
-	        }
-		if (clientId) {
-			            payload.obj.properties.ga4_client_id = clientId;
-		}
+            const getCookieValue = (cookieName) => {
+                const cookiePattern = new RegExp('(?:(?:^|.*;\\s*)' + cookieName + '\\s*\\=\\s*([^;]*).*$)|^.*$');
+                return document.cookie.replace(cookiePattern, "$1");
+            };
 
-		    
-	
-	        const sessionNum = extractSessionNumber(ga4CookieValue);
-	        if (!isNaN(sessionNum)) {
-	            payload.obj.properties.ga4_session_number = sessionNum;
-	        }
-	    }
-	
-	    next(payload);
-	};
+            // Get the GA cookie value
+            const ga4CookieValue = getCookieValue(ga4CookieName);
+            if (!ga4CookieValue) {
+                throw new Error("GA4 cookie not found");
+            }
+
+            function extractIds(cookieValue) {
+                var ids = cookieValue.split('.');
+                return {
+                    sessionId: ids[2]
+                };
+            }
+
+            var ids = extractIds(ga4CookieValue);
+
+            function get_ga_clientid() {
+                var cookie = {};
+                document.cookie.split(';').forEach(function (el) {
+                    var splitCookie = el.split('=');
+                    var key = splitCookie[0].trim();
+                    var value = splitCookie[1];
+                    cookie[key] = value;
+                });
+                if (cookie["_ga"]) {
+                    return cookie["_ga"].substring(6);
+                } else {
+                    throw new Error("GA client ID not found");
+                }
+            }
+
+            let clientId = get_ga_clientid();
+
+            // Extract session ID and session number from GA4 cookie
+            if (ga4CookieValue.split('.').length >= 4) {
+                const [, , sessionNumber, sessionId] = ga4CookieValue.split('.');
+            } else {
+                throw new Error("GA4 cookie is missing session information");
+            }
+
+            if (ids.sessionId) {
+                payload.obj.properties.ga4_session_id = ids.sessionId;
+            }
+
+            if (clientId) {
+                payload.obj.properties.ga4_client_id = clientId;
+            }
+
+            const sessionNum = extractSessionNumber(ga4CookieValue);
+            if (!isNaN(sessionNum)) {
+                payload.obj.properties.ga4_session_number = sessionNum;
+            }
+        }
+
+        next(payload);
+    } catch (error) {
+        console.error("Error in addGA4Properties:", error);
+        // Optionally, you can add any fallback behavior here or decide not to call next()
+        next(payload);  // Ensure `next` is called even if there's an error
+    }
+};
 
 analytics.addSourceMiddleware(addGA4Properties);
+
 
 
 
@@ -151,7 +259,7 @@ analytics.addSourceMiddleware(generateEventId);
 		"landing.casamiento.com.uy": "c8loqfeocDRtMtcTGBa4jAR3t7B5febV",
 		"landing.matrimonio.com.pe": "V4qUYRwsg4HWPyBCu86eEESqmMGC9w6V",
 		"pros.weddingpro.com": "Scko6NfkLryer27iA7jqDaDYhw0JueFh",
-		"theknotww.com": "UuP98lzDHr9SjV0GQyXPGEsS4O96OqPL",
+		"www.theknotww.com": "UuP98lzDHr9SjV0GQyXPGEsS4O96OqPL",
           // Add more domain-key pairs as needed
         };
 	console.log(domain);
@@ -199,6 +307,22 @@ window.onload = function () {
             console.log('Updated Form Values:', formValuesCache);
           }
         });
+      });
+ 	 // Capture the hidden field `Form_Type` in the cache
+      const hiddenField = form.querySelector('input[name="Form_Type"]');
+
+      if (hiddenField) {
+
+        formValuesCache[hiddenField.name] = hiddenField.value; // Initialize with the value
+
+      }
+
+      // Update the cache for hidden fields on form submission
+      form.addEventListener('submit', () => {
+        if (hiddenField) {
+          formValuesCache[hiddenField.name] = hiddenField.value; // Ensure it captures on submit
+        }
+
       });
     });
 
@@ -274,20 +398,55 @@ const formSubmittedTrack = (event, formValuesCache) => {
   try {
     const formElement = event.target;
     const traits = {};
+    let autofillDetected = false;
 
     // Map form field values to traits based on formFieldTraitMapping
-   formFieldTraitMapping.forEach((mapping) => {
+    formFieldTraitMapping.forEach((mapping) => {
+      // Get the value from the cache using the input name
       let value = formValuesCache[mapping.inputName] || null;
+      console.log("Cache value for", mapping.inputName, ":", value);
+
+      // Normalize the value if it exists
       if (value) {
         value = normalizeValue(value, mapping.traitName);
+        console.log("Normalized value for", mapping.traitName, ":", value);
       }
-      traits[mapping.traitName] = value;
+
+      // Only add to traits if the value is not null
+      if (value) {
+        traits[mapping.traitName] = value;
+      } else {
+        console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
+      }
     });
 
-    // Call the identify function from Segment with only traits
+    // Log to check final traits structure
+    console.log("Final traits object to be sent to Segment:", traits);
+
+    // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
-    // Track the form submission
+    // Get the email from formValuesCache or traits
+    let email = formValuesCache.email || traits.email;
+
+    // Define hashedEmail before the if block to avoid "undefined" errors
+    let hashedEmail = false; // Default value when email is not available
+
+    if (email) {
+      // Ensure sha256 function is called and result is stored in hashedEmail
+      hashedEmail = sha256(email) || false;
+
+      // Check if hashedEmail is valid before using it
+      if (hashedEmail) {
+        console.log(hashedEmail);
+      } else {
+        console.log("Hashing failed or no valid result.");
+      }
+    } else {
+      console.log("No email provided.");
+    }
+
+    // Track the form submission with hashedEmail (even if it's false)
     analytics.track(
       'Form Submitted',
       {
@@ -295,12 +454,14 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_name: formElement.dataset.formName,
         form_type: formElement.dataset.formType,
         form_header: formElement.dataset.formHeader,
+        form_type: formValuesCache['Form_Type'],
         form_description: formElement.dataset.formDescription,
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
-        _fbc: fbcCookie || null, // Add _fbc property with the value from the fbcCookie
-        _fbp: fbpCookie || null, // Add _fbp property with the value from the fbpCookie
+        hashed_email: hashedEmail, // This will either be false or the hashed email
+        _fbc: fbcCookie || null,
+        _fbp: fbpCookie || null,
       },
       {
         traits,
@@ -311,7 +472,6 @@ const formSubmittedTrack = (event, formValuesCache) => {
     console.error('Error handling form submission:', error);
   }
 };
-
 
   
 function getCookie(cookieName) {
@@ -356,5 +516,69 @@ function getCookie(cookieName) {
     return foundCookie.split('=')[1];
   }
 
+// comment to trigger a new build job 
+
   return null;
 }
+
+
+// LINK and CTA Clicked
+
+// Define an array of CSS classes that would classify the link as a CTA
+const ctaClasses = ['cta', 'button', 'highlight', 'cta-learn-more']; // Add as many classes as needed
+
+// Function to check if an element or its parent has a CTA class
+const hasCTAClass = (element) => {
+  return ctaClasses.some((ctaClass) =>
+    element.classList.contains(ctaClass) ||
+    (element.parentElement && element.parentElement.classList.contains(ctaClass))
+  );
+};
+
+// Function to track event and navigate
+const trackEventAndNavigate = (eventName, properties, href, target) => {
+  return new Promise((resolve) => {
+    analytics.track(eventName, properties, resolve); // Resolve only after tracking is complete
+  }).then(() => {
+    // After tracking is complete, navigate to the link
+    if (target === '_blank') {
+      // Open in a new tab
+      window.open(href, '_blank');
+    } else {
+      // Navigate in the same tab
+      window.location.href = href;
+    }
+  });
+};
+
+// Event listener for link clicks
+document.addEventListener('click', (event) => {
+  const linkElement = event.target.closest('a'); // Find the nearest <a> element
+
+  if (linkElement) {
+    const href = linkElement.href;
+    const target = linkElement.target; // Capture the target attribute
+
+    // Determine link type
+    const linkType = linkElement.hostname === window.location.hostname ? 'internal' : 'external';
+
+    // Check if the link qualifies as a CTA based on the CSS classes
+    const isCTA = hasCTAClass(linkElement);
+
+    // Track either "CTA Clicked" or "Link Clicked"
+    const eventName = isCTA ? 'CTA Clicked' : 'Link Clicked';
+    const properties = {
+      link_type: linkType,
+      href: href,
+    };
+
+    if (target === '_blank' || event.ctrlKey || event.metaKey) {
+      // Allow default behavior for new tab or command/ctrl click
+      analytics.track(eventName, properties);
+    } else {
+      // Prevent immediate navigation and track before navigating
+      event.preventDefault();
+      trackEventAndNavigate(eventName, properties, href, target);
+    }
+  }
+});
