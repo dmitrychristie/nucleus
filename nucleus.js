@@ -459,7 +459,8 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
-        hashed_email: hashedEmail, // This will either be false or the hashed email
+        hashed_email: hashedEmail,
+	sha256_email: hashedEmail,// This will either be false or the hashed email
         _fbc: fbcCookie || null,
         _fbp: fbpCookie || null,
       },
