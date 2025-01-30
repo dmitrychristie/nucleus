@@ -523,7 +523,7 @@ function getCookie(cookieName) {
   return null;
 }
 
-
+/*
 // LINK and CTA Clicked
 
 // Define an array of CSS classes that would classify the link as a CTA
@@ -584,3 +584,4 @@ document.addEventListener('click', (event) => {
     }
   }
 });
+*/
