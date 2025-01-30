@@ -1,3 +1,90 @@
+function sha256(ascii) {
+    function rightRotate(value, amount) {
+        return (value >>> amount) | (value << (32 - amount));
+    }
+
+    var mathPow = Math.pow;
+    var maxWord = mathPow(2, 32);
+    var lengthProperty = 'length';
+    var i, j;
+    var result = '';
+
+    var words = [];
+    var asciiBitLength = ascii[lengthProperty] * 8;
+
+    var hash = (sha256.h = sha256.h || []);
+    var k = (sha256.k = sha256.k || []);
+    var primeCounter = k[lengthProperty];
+
+    var isComposite = {};
+    for (var candidate = 2; primeCounter < 64; candidate++) {
+        if (!isComposite[candidate]) {
+            for (i = 0; i < 313; i += candidate) {
+                isComposite[i] = candidate;
+            }
+            hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
+            k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
+        }
+    }
+
+    ascii += '\x80';
+    while ((ascii[lengthProperty] % 64) - 56) ascii += '\x00';
+    for (i = 0; i < ascii[lengthProperty]; i++) {
+        j = ascii.charCodeAt(i);
+        if (j >> 8) return;
+        words[i >> 2] |= j << (((3 - i) % 4) * 8);
+    }
+    words[words[lengthProperty]] = (asciiBitLength / maxWord) | 0;
+    words[words[lengthProperty]] = asciiBitLength;
+
+    for (j = 0; j < words[lengthProperty]; ) {
+        var w = words.slice(j, (j += 16));
+        var oldHash = hash;
+        hash = hash.slice(0, 8);
+
+        for (i = 0; i < 64; i++) {
+            var i2 = i + j;
+            var w15 = w[i - 15],
+                w2 = w[i - 2];
+
+            var a = hash[0],
+                e = hash[4];
+            var temp1 =
+                hash[7] +
+                (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
+                ((e & hash[5]) ^ (~e & hash[6])) +
+                k[i] +
+                (w[i] =
+                    i < 16
+                        ? w[i]
+                        : (w[i - 16] +
+                            (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+                            w[i - 7] +
+                            (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);
+            var temp2 =
+                (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
+                ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+            
+            hash = [(temp1 + temp2) | 0].concat(hash);
+            hash[4] = (hash[4] + temp1) | 0;
+        }
+
+        for (i = 0; i < 8; i++) {
+            hash[i] = (hash[i] + oldHash[i]) | 0;
+        }
+    }
+
+    for (i = 0; i < 8; i++) {
+        for (j = 3; j + 1; j--) {
+            var b = (hash[i] >> (j * 8)) & 255;
+            result += (b < 16 ? 0 : '') + b.toString(16);
+        }
+    }
+    return result;
+}
+
+
+
 !function(){
     var analytics = window.analytics = window.analytics || [];
     
@@ -314,24 +401,24 @@ const formSubmittedTrack = (event, formValuesCache) => {
     let autofillDetected = false;
 
     // Map form field values to traits based on formFieldTraitMapping
-formFieldTraitMapping.forEach((mapping) => {
-  // Get the value from the cache using the input name
-  let value = formValuesCache[mapping.inputName] || null;
-  console.log("Cache value for", mapping.inputName, ":", value);
+    formFieldTraitMapping.forEach((mapping) => {
+      // Get the value from the cache using the input name
+      let value = formValuesCache[mapping.inputName] || null;
+      console.log("Cache value for", mapping.inputName, ":", value);
 
-  // Normalize the value if it exists
-  if (value) {
-    value = normalizeValue(value, mapping.traitName);
-    console.log("Normalized value for", mapping.traitName, ":", value);
-  }
+      // Normalize the value if it exists
+      if (value) {
+        value = normalizeValue(value, mapping.traitName);
+        console.log("Normalized value for", mapping.traitName, ":", value);
+      }
 
-  // Only add to traits if the value is not null
-  if (value) {
-    traits[mapping.traitName] = value;
-  } else {
-    console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
-  }
-});
+      // Only add to traits if the value is not null
+      if (value) {
+        traits[mapping.traitName] = value;
+      } else {
+        console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
+      }
+    });
 
     // Log to check final traits structure
     console.log("Final traits object to be sent to Segment:", traits);
@@ -339,7 +426,27 @@ formFieldTraitMapping.forEach((mapping) => {
     // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
-    // Track the form submission
+    // Get the email from formValuesCache or traits
+    let email = formValuesCache.email || traits.email;
+
+    // Define hashedEmail before the if block to avoid "undefined" errors
+    let hashedEmail = false; // Default value when email is not available
+
+    if (email) {
+      // Ensure sha256 function is called and result is stored in hashedEmail
+      hashedEmail = sha256(email) || false;
+
+      // Check if hashedEmail is valid before using it
+      if (hashedEmail) {
+        console.log(hashedEmail);
+      } else {
+        console.log("Hashing failed or no valid result.");
+      }
+    } else {
+      console.log("No email provided.");
+    }
+
+    // Track the form submission with hashedEmail (even if it's false)
     analytics.track(
       'Form Submitted',
       {
@@ -352,6 +459,9 @@ formFieldTraitMapping.forEach((mapping) => {
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
+        hashed_email: hashedEmail,
+	email: email,
+	sha256_email: hashedEmail,// This will either be false or the hashed email
         _fbc: fbcCookie || null,
         _fbp: fbpCookie || null,
       },
