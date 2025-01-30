@@ -151,6 +151,8 @@ var generateEventId = function({ payload, next }) {
 analytics.addSourceMiddleware(generateEventId);
 
 
+
+
 	
         // Function to look up the write key based on the domain name
       function getWriteKey() {
@@ -312,24 +314,24 @@ const formSubmittedTrack = (event, formValuesCache) => {
     let autofillDetected = false;
 
     // Map form field values to traits based on formFieldTraitMapping
-    formFieldTraitMapping.forEach((mapping) => {
-      // Get the value from the cache using the input name
-      let value = formValuesCache[mapping.inputName] || null;
-      console.log("Cache value for", mapping.inputName, ":", value);
+formFieldTraitMapping.forEach((mapping) => {
+  // Get the value from the cache using the input name
+  let value = formValuesCache[mapping.inputName] || null;
+  console.log("Cache value for", mapping.inputName, ":", value);
 
-      // Normalize the value if it exists
-      if (value) {
-        value = normalizeValue(value, mapping.traitName);
-        console.log("Normalized value for", mapping.traitName, ":", value);
-      }
+  // Normalize the value if it exists
+  if (value) {
+    value = normalizeValue(value, mapping.traitName);
+    console.log("Normalized value for", mapping.traitName, ":", value);
+  }
 
-      // Only add to traits if the value is not null
-      if (value) {
-        traits[mapping.traitName] = value;
-      } else {
-        console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
-      }
-    });
+  // Only add to traits if the value is not null
+  if (value) {
+    traits[mapping.traitName] = value;
+  } else {
+    console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
+  }
+});
 
     // Log to check final traits structure
     console.log("Final traits object to be sent to Segment:", traits);
@@ -337,27 +339,7 @@ const formSubmittedTrack = (event, formValuesCache) => {
     // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
-    // Get the email from formValuesCache or traits
-    let email = formValuesCache.email || traits.email;
-
-    // Define hashedEmail before the if block to avoid "undefined" errors
-    let hashedEmail = false; // Default value when email is not available
-
-    if (email) {
-      // Ensure sha256 function is called and result is stored in hashedEmail
-      hashedEmail = sha256(email) || false;
-
-      // Check if hashedEmail is valid before using it
-      if (hashedEmail) {
-        console.log(hashedEmail);
-      } else {
-        console.log("Hashing failed or no valid result.");
-      }
-    } else {
-      console.log("No email provided.");
-    }
-
-    // Track the form submission with hashedEmail (even if it's false)
+    // Track the form submission
     analytics.track(
       'Form Submitted',
       {
@@ -370,9 +352,6 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
-        hashed_email: hashedEmail,
-	email: email,
-	sha256_email: hashedEmail,// This will either be false or the hashed email
         _fbc: fbcCookie || null,
         _fbp: fbpCookie || null,
       },
@@ -494,6 +473,4 @@ document.addEventListener('click', (event) => {
       trackEventAndNavigate(eventName, properties, href, target);
     }
   }
-  
 });
-
