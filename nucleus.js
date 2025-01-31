@@ -243,16 +243,6 @@ window.onload = function () {
       });
     });
 
-if (typeof gform !== 'undefined' && gform.addAction) {
-      gform.addAction("gform_post_submission", (response, formId) => {
-        // Handle submission after Gravity Forms processes it
-        if (isFormSubmitted) {
-          console.log('Gravity Forms submission processed for form:', formId);
-          formSubmittedTrack(response, formValuesCache); // Call your custom submission handler
-        }
-      });
-    }
-
   } catch (error) {
     console.error('Error initializing form tracking:', error);
   }
