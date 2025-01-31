@@ -44,11 +44,12 @@
 
 	 analytics.addSourceMiddleware(addBuildProduct);
 
-	const addGA4Properties = ({ payload, next, integrations }) => {
+	if(window.nucleusGA4MeasurementId) { 
+		const addGA4Properties = ({ payload, next, integrations }) => {
     try {
         payload.obj.context = payload.obj.context || {};
         
-	let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || 'G-EYS39LRP87';
+	let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
         console.log(nucleusGA4MeasurementId);
 
         // Make sure nucleusGA4MeasurementId is long enough before calling substring
@@ -136,6 +137,9 @@
 };
 
 analytics.addSourceMiddleware(addGA4Properties);
+	} else {
+console.log('Warning! GA4 Measurement ID is not defined');
+}
 
 
 
