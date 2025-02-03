@@ -422,14 +422,12 @@ function getCookie(cookieName) {
 
 // gravity forms test
 
-document.addEventListener('gform_after_submission', function(event, formId) {
-  // Log the form submission data
-  console.log('gform_after_submission triggered for Form ID:', formId);
-
-  // You can access the form data in the event as well
-  const formData = event.detail; // Contains the submitted form data
-  console.log('Form data:', formData);
-}, false);
+document.addEventListener('gform/theme/scripts_loaded', () => {
+    gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
+        console.log('test');
+        return data;
+    });
+});
 
 
 
