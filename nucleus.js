@@ -371,8 +371,9 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
     gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
         const email = gform.utils.getNode('.gfield--type-email input', data.form, true);
         console.log('email:', email.value);
- 	analytics.track('Test', 
-			{ email: email}
+	    
+ 	analytics.track('Test Form Submitted', 
+			{ email: email.value}
 	);
         return data;
     });
