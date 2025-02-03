@@ -424,36 +424,7 @@ function getCookie(cookieName) {
 
 document.addEventListener('gform/theme/scripts_loaded', () => {
     gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-        // Ensure we are working with the right form (optional)
-        if (data.form.dataset.formid !== '1') {
-            return data;
-        }
-
-        // Access form fields (for example, capturing email, name, and phone fields)
-        const emailField = gform.utils.getNode('.gfield--type-email input', data.form, true);
-        const nameField = gform.utils.getNode('.gfield--type-name input', data.form, true);
-        const phoneField = gform.utils.getNode('.gfield--type-phone input', data.form, true);
-
-        // Extract field values
-        const formData = {
-            email: emailField ? emailField.value : '',
-            name: nameField ? nameField.value : '',
-            phone: phoneField ? phoneField.value : ''
-        };
-
-        // Log the collected data (for debugging)
-        console.log('Collected Form Data:', formData);
-
-        // Send the collected form data to Segment as a single property
-        if (typeof analytics !== 'undefined') {
-            analytics.track('Form Submitted', {
-                formData: formData
-            });
-        } else {
-            console.error('Segment Analytics is not available');
-        }
-
-        // Return the data object to proceed with the form submission
+        localStorage.setItem('nucleus-data', JSON.stringify(data));
         return data;
     });
 });
