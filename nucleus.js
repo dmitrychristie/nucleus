@@ -202,6 +202,9 @@ analytics.addSourceMiddleware(generateEventId);
 
   
 // Segment Events  
+
+
+
   
 window.onload = function () {
   try {
@@ -416,6 +419,31 @@ function getCookie(cookieName) {
 
   return null;
 }
+
+// gravity forms test
+
+document.addEventListener('gform_pre_submission', function (event) {
+  try {
+    const formId = event.detail.formId; // Get the Gravity Form ID from the event details
+    console.log('Gravity Forms pre-submission hook triggered for Form ID:', formId);
+
+    // Get the form element by ID
+    const formElement = document.getElementById(`gform_${formId}`);
+    if (formElement) {
+      console.log('Gravity Form element found:', formElement);
+
+      // Log all input field values
+      const inputFields = formElement.querySelectorAll('input, textarea, select');
+      inputFields.forEach((field) => {
+        console.log(`Field Name: ${field.name}, Field Value: ${field.value}`);
+      });
+    } else {
+      console.log('Form element not found for ID:', formId);
+    }
+  } catch (error) {
+    console.error('Error in Gravity Forms hook test:', error);
+  }
+});
 
 
 // LINK and CTA Clicked
