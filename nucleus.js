@@ -204,11 +204,13 @@ analytics.addSourceMiddleware(generateEventId);
 // Segment Events  
 
 
-
+let formValuesCache = {};
+let hiddenField = {};
+let traits = {};
   
 window.onload = function () {
   try {
-    const formValuesCache = {};
+    
 
     // Get all forms on the page
     const forms = document.querySelectorAll('form');
@@ -231,7 +233,7 @@ window.onload = function () {
         });
       });
  	 // Capture the hidden field `Form_Type` in the cache
-      const hiddenField = form.querySelector('input[name="Form_Type"]');
+      let hiddenField = form.querySelector('input[name="Form_Type"]');
 
       if (hiddenField) {
 
@@ -319,7 +321,7 @@ const fbpCookie = getCookie('_fbp');
 const formSubmittedTrack = (formValuesCache) => {
   try {
     const formElement = event.target;
-    const traits = {};
+    
     let autofillDetected = false;
 
     // Map form field values to traits based on formFieldTraitMapping
@@ -377,7 +379,9 @@ formFieldTraitMapping.forEach((mapping) => {
 
 document.addEventListener('gform/theme/scripts_loaded', () => {
     gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-	analytics.track('test');
+	analytics.track('test' {
+		test: 'test'},
+	    {trats,});
 	
 	return data;
     });
