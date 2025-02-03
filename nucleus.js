@@ -442,7 +442,7 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
 
     // Track the form submission event
     analytics.track(
-      'Test Form Submitted',
+      'Form Submitted',
       {
         form_id: formElement.parentElement.id,
         form_name: formElement.dataset.formName,
