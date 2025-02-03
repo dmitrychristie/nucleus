@@ -216,13 +216,7 @@ window.onload = function () {
     forms.forEach((form) => {
 	form.addEventListener('submit', (event) => formSubmittedTrack(formValuesCache));
 	
-	document.addEventListener('gform/theme/scripts_loaded', () => {
-	    gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-		analytics.track('test');
-		formSubmittedTrack(formValuesCache);
-		return data;
-	    });
-	});
+	
 
       // Add an event listener to each input field for real-time updates
       const inputFields = form.querySelectorAll('input, textarea, select');
@@ -379,6 +373,14 @@ formFieldTraitMapping.forEach((mapping) => {
     console.error('Error handling form submission:', error);
   }
 };
+
+
+document.addEventListener('gform/theme/scripts_loaded', () => {
+    gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
+	analytics.track('test');
+	return data;
+    });
+});
 
   
 function getCookie(cookieName) {
