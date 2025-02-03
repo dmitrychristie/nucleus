@@ -1,13 +1,13 @@
 !function(){
     var analytics = window.analytics = window.analytics || [];
-    
+
     if (!analytics.initialize) {
       if (analytics.invoked) {
         window.console && console.error && console.error("Segment snippet included twice.");
       } else {
         analytics.invoked = !0;
         analytics.methods = ["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];
-        
+
         analytics.factory = function(e){
           return function(){
             var t = Array.prototype.slice.call(arguments);
@@ -16,7 +16,7 @@
             return analytics;
           }
         };
-        
+
         for (var e = 0; e < analytics.methods.length; e++) {
           var key = analytics.methods[e];
           analytics[key] = analytics.factory(key);
@@ -48,7 +48,7 @@
 		const addGA4Properties = ({ payload, next, integrations }) => {
     try {
         payload.obj.context = payload.obj.context || {};
-        
+
 	let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
         console.log(nucleusGA4MeasurementId);
 
@@ -157,7 +157,7 @@ analytics.addSourceMiddleware(generateEventId);
 
 
 
-	
+
         // Function to look up the write key based on the domain name
       function getWriteKey() {
         var domain = window.location.hostname;
@@ -188,7 +188,7 @@ analytics.addSourceMiddleware(generateEventId);
           return "XeEJN55FrsKZFzBKqtu6wqnWRaZmXoKK";
         }
       }
-		
+
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
@@ -200,7 +200,7 @@ analytics.addSourceMiddleware(generateEventId);
   }();
 
 
-  
+
 // Segment Events  
 // Global variables
 let formValuesCache = {};
@@ -372,7 +372,8 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
     const formElement = data.form;
 	console.log(formElement);
     const traits = {};
-    
+	const email = gform.utils.getNode('.gfield--type-email input', data.form, true);
+
     // Define the form field mapping
     const formFieldTraitMapping = [
       { inputName: 'first_name', traitName: 'firstName' },
@@ -440,31 +441,28 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
     // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
-	  async (data) => {
-        const email = gform.utils.getNode('.gfield--type-email input', data.form, true);
-        console.log('email:', email.value);
-
     // Track the form submission event
     analytics.track(
-      'Form Submitted',
+      'Test Form Submitted',
       {
         form_id: formElement.parentElement.id,
         form_name: formElement.dataset.formName,
         form_type: formElement.dataset.formType,
         form_location: document.location.pathname,
         form_result: 'success',
-	email: email.value,
+	email: email,
       },
       {
         traits,
       }
     );
 
-   return data;
+    return data;
+   
   });
 });
 
-  
+
 function getCookie(cookieName) {
   const name = cookieName + '=';
   const decodedCookie = decodeURIComponent(document.cookie);
