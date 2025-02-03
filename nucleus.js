@@ -375,12 +375,6 @@ formFieldTraitMapping.forEach((mapping) => {
 };
 
 
-document.addEventListener('gform/theme/scripts_loaded', () => {
-    gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-	analytics.track('test');
-	return data;
-    });
-});
 
   
 function getCookie(cookieName) {
