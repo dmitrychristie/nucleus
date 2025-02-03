@@ -422,33 +422,14 @@ function getCookie(cookieName) {
 
 // gravity forms test
 
-document.addEventListener('gform_pre_submission', function (event) {
-  try {
-    const formId = event.detail.formId; // Get the Gravity Form ID from the event details
-    console.log('Gravity Forms pre-submission hook triggered for Form ID:', formId);
+document.addEventListener('gform_after_submission', function(event, formId) {
+  // Log the form submission data
+  console.log('gform_after_submission triggered for Form ID:', formId);
 
-    // Get the form element by ID
-    const formElement = document.getElementById(`gform_${formId}`);
-    if (formElement) {
-      console.log('Gravity Form element found:', formElement);
-
-      // Log all input field values
-      const inputFields = formElement.querySelectorAll('input, textarea, select');
-      inputFields.forEach((field) => {
-        console.log(`Field Name: ${field.name}, Field Value: ${field.value}`);
-      });
-    } else {
-      console.log('Form element not found for ID:', formId);
-    }
-
-    // Prevent the redirect for testing purposes
-    event.preventDefault();
-    console.log('Redirect prevented for testing. Remove event.preventDefault() for production.');
-
-  } catch (error) {
-    console.error('Error in Gravity Forms hook test:', error);
-  }
-});
+  // You can access the form data in the event as well
+  const formData = event.detail; // Contains the submitted form data
+  console.log('Form data:', formData);
+}, false);
 
 
 
