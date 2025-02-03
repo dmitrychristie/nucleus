@@ -370,6 +370,7 @@ const formSubmittedTrack = (event) => {
 document.addEventListener('gform/theme/scripts_loaded', () => {
   gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
     const formElement = data.form;
+	console.log(formElement);
     const traits = {};
     
     // Define the form field mapping
