@@ -214,7 +214,14 @@ window.onload = function () {
     const forms = document.querySelectorAll('form');
 
     forms.forEach((form) => {
-      form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
+	form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
+	
+	document.addEventListener('gform/theme/scripts_loaded', () => {
+	    gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
+		formSubmittedTrack(event, formValuesCache);
+		return data;
+	    });
+	});
 
       // Add an event listener to each input field for real-time updates
       const inputFields = form.querySelectorAll('input, textarea, select');
