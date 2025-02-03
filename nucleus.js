@@ -214,11 +214,11 @@ window.onload = function () {
     const forms = document.querySelectorAll('form');
 
     forms.forEach((form) => {
-	form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
+	form.addEventListener('submit', (event) => formSubmittedTrack(formValuesCache));
 	
 	document.addEventListener('gform/theme/scripts_loaded', () => {
 	    gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-		formSubmittedTrack(event, formValuesCache);
+		formSubmittedTrack(formValuesCache);
 		return data;
 	    });
 	});
@@ -321,7 +321,7 @@ const normalizeValue = (value, key) => {
 const fbcCookie = getCookie('_fbc');
 const fbpCookie = getCookie('_fbp');
   
-const formSubmittedTrack = (event, formValuesCache) => {
+const formSubmittedTrack = (formValuesCache) => {
   try {
     const formElement = event.target;
     const traits = {};
@@ -427,14 +427,7 @@ function getCookie(cookieName) {
   return null;
 }
 
-// gravity forms test
 
-document.addEventListener('gform/theme/scripts_loaded', () => {
-    gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-        localStorage.setItem('nucleus-data', JSON.stringify(data));
-        return data;
-    });
-});
 
 
 
