@@ -440,10 +440,16 @@ document.addEventListener('gform_pre_submission', function (event) {
     } else {
       console.log('Form element not found for ID:', formId);
     }
+
+    // Prevent the redirect for testing purposes
+    event.preventDefault();
+    console.log('Redirect prevented for testing. Remove event.preventDefault() for production.');
+
   } catch (error) {
     console.error('Error in Gravity Forms hook test:', error);
   }
 });
+
 
 
 // LINK and CTA Clicked
