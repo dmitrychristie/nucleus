@@ -424,7 +424,7 @@ function getCookie(cookieName) {
 
 document.addEventListener('gform/theme/scripts_loaded', () => {
     gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-        console.log('test');
+        analytics.track('test');
         return data;
     });
 });
