@@ -368,15 +368,94 @@ const formSubmittedTrack = (event) => {
 };
 
 document.addEventListener('gform/theme/scripts_loaded', () => {
-    gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-        const email = gform.utils.getNode('.gfield--type-email input', data.form, true);
-        console.log('email:', email.value);
-	    
- 	analytics.track('Test Form Submitted', 
-			{ email: email.value}
-	);
-        return data;
+  gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
+    const formElement = data.form;
+    const traits = {};
+    
+    // Define the form field mapping
+    const formFieldTraitMapping = [
+      { inputName: 'first_name', traitName: 'firstName' },
+      { inputName: 'last_name', traitName: 'lastName' },
+      { inputName: 'email', traitName: 'email' },
+      { inputName: 'phone_number', traitName: 'phone' },
+      { inputName: 'company', traitName: 'company' },
+      { inputName: 'country', traitName: 'country' },
+    ];
+
+    // Helper functions for transformations
+    const trimWhitespace = (value) => value.trim();
+    const toLowerCase = (value) => value.toLowerCase();
+    const formatPhoneNumber = (phone, countryCode = '1') => {
+      const cleaned = phone.replace(/[^a-zA-Z0-9]/g, '').replace(/^0+/, '');
+      return `${countryCode}${cleaned}`;
+    };
+
+    // Normalize form values
+    const normalizeValue = (value, key) => {
+      if (!value) return null;
+
+      value = trimWhitespace(value);
+
+      switch (key) {
+        case 'firstName':
+        case 'lastName':
+        case 'country':
+          value = toLowerCase(value);
+          break;
+        case 'phone':
+          value = formatPhoneNumber(value); // Assuming '1' as default country code
+          break;
+        case 'email':
+          value = value.toLowerCase();
+          break;
+        default:
+          break;
+      }
+
+      return value;
+    };
+
+    // Map form field values to traits based on formFieldTraitMapping
+    formFieldTraitMapping.forEach((mapping) => {
+      const field = gform.utils.getNode(`.gfield--type-${mapping.inputName} input`, formElement, true);
+      if (field) {
+        let value = field.value || null;
+
+        // Normalize the value if it exists
+        if (value) {
+          value = normalizeValue(value, mapping.traitName);
+        }
+
+        // Only add to traits if the value is not null
+        if (value) {
+          traits[mapping.traitName] = value;
+        }
+      }
     });
+
+    // Log the traits object to be sent to Segment (optional)
+    console.log("Final traits object to be sent to Segment:", traits);
+
+    // Call the identify function from Segment with the final traits object
+    analytics.identify(traits);
+
+    // Track the form submission event
+    analytics.track(
+      'Test Form Submitted',
+      {
+        form_id: formElement.parentElement.id,
+        form_name: formElement.dataset.formName,
+        form_type: formElement.dataset.formType,
+        form_location: document.location.pathname,
+        form_result: 'success',
+      },
+      {
+        traits,
+      }
+    );
+
+    return data;
+  });
 });
 
   
