@@ -455,7 +455,7 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
       }
     );
 
-   
+   return data;
   });
 });
 
