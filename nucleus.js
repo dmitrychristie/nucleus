@@ -372,7 +372,6 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
     const formElement = data.form;
 	console.log(formElement);
     const traits = {};
-	const email = gform.utils.getNode('.gfield--type-email input', data.form, true);
 
     // Define the form field mapping
     const formFieldTraitMapping = [
@@ -450,7 +449,7 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
         form_type: formElement.dataset.formType,
         form_location: document.location.pathname,
         form_result: 'success',
-	email: email,
+	email: traits.email,
       },
       {
         traits,
