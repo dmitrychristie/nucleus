@@ -1,100 +1,13 @@
-function sha256(ascii) {
-    function rightRotate(value, amount) {
-        return (value >>> amount) | (value << (32 - amount));
-    }
-
-    var mathPow = Math.pow;
-    var maxWord = mathPow(2, 32);
-    var lengthProperty = 'length';
-    var i, j;
-    var result = '';
-
-    var words = [];
-    var asciiBitLength = ascii[lengthProperty] * 8;
-
-    var hash = (sha256.h = sha256.h || []);
-    var k = (sha256.k = sha256.k || []);
-    var primeCounter = k[lengthProperty];
-
-    var isComposite = {};
-    for (var candidate = 2; primeCounter < 64; candidate++) {
-        if (!isComposite[candidate]) {
-            for (i = 0; i < 313; i += candidate) {
-                isComposite[i] = candidate;
-            }
-            hash[primeCounter] = (mathPow(candidate, 0.5) * maxWord) | 0;
-            k[primeCounter++] = (mathPow(candidate, 1 / 3) * maxWord) | 0;
-        }
-    }
-
-    ascii += '\x80';
-    while ((ascii[lengthProperty] % 64) - 56) ascii += '\x00';
-    for (i = 0; i < ascii[lengthProperty]; i++) {
-        j = ascii.charCodeAt(i);
-        if (j >> 8) return;
-        words[i >> 2] |= j << (((3 - i) % 4) * 8);
-    }
-    words[words[lengthProperty]] = (asciiBitLength / maxWord) | 0;
-    words[words[lengthProperty]] = asciiBitLength;
-
-    for (j = 0; j < words[lengthProperty]; ) {
-        var w = words.slice(j, (j += 16));
-        var oldHash = hash;
-        hash = hash.slice(0, 8);
-
-        for (i = 0; i < 64; i++) {
-            var i2 = i + j;
-            var w15 = w[i - 15],
-                w2 = w[i - 2];
-
-            var a = hash[0],
-                e = hash[4];
-            var temp1 =
-                hash[7] +
-                (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
-                ((e & hash[5]) ^ (~e & hash[6])) +
-                k[i] +
-                (w[i] =
-                    i < 16
-                        ? w[i]
-                        : (w[i - 16] +
-                            (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
-                            w[i - 7] +
-                            (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0);
-            var temp2 =
-                (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
-                ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
-            
-            hash = [(temp1 + temp2) | 0].concat(hash);
-            hash[4] = (hash[4] + temp1) | 0;
-        }
-
-        for (i = 0; i < 8; i++) {
-            hash[i] = (hash[i] + oldHash[i]) | 0;
-        }
-    }
-
-    for (i = 0; i < 8; i++) {
-        for (j = 3; j + 1; j--) {
-            var b = (hash[i] >> (j * 8)) & 255;
-            result += (b < 16 ? 0 : '') + b.toString(16);
-        }
-    }
-    return result;
-}
-
-
-
 !function(){
     var analytics = window.analytics = window.analytics || [];
-    
+
     if (!analytics.initialize) {
       if (analytics.invoked) {
         window.console && console.error && console.error("Segment snippet included twice.");
       } else {
         analytics.invoked = !0;
         analytics.methods = ["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];
-        
+
         analytics.factory = function(e){
           return function(){
             var t = Array.prototype.slice.call(arguments);
@@ -103,7 +16,7 @@ function sha256(ascii) {
             return analytics;
           }
         };
-        
+
         for (var e = 0; e < analytics.methods.length; e++) {
           var key = analytics.methods[e];
           analytics[key] = analytics.factory(key);
@@ -131,11 +44,12 @@ function sha256(ascii) {
 
 	 analytics.addSourceMiddleware(addBuildProduct);
 
-	const addGA4Properties = ({ payload, next, integrations }) => {
+	if(window.nucleusGA4MeasurementId) { 
+		const addGA4Properties = ({ payload, next, integrations }) => {
     try {
         payload.obj.context = payload.obj.context || {};
-        
-        let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+
+	let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
         console.log(nucleusGA4MeasurementId);
 
         // Make sure nucleusGA4MeasurementId is long enough before calling substring
@@ -223,6 +137,9 @@ function sha256(ascii) {
 };
 
 analytics.addSourceMiddleware(addGA4Properties);
+	} else {
+console.log('Warning! GA4 Measurement ID is not defined');
+}
 
 
 
@@ -240,7 +157,7 @@ analytics.addSourceMiddleware(generateEventId);
 
 
 
-	
+
         // Function to look up the write key based on the domain name
       function getWriteKey() {
         var domain = window.location.hostname;
@@ -271,7 +188,7 @@ analytics.addSourceMiddleware(generateEventId);
           return "XeEJN55FrsKZFzBKqtu6wqnWRaZmXoKK";
         }
       }
-		
+
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
@@ -283,54 +200,14 @@ analytics.addSourceMiddleware(generateEventId);
   }();
 
 
-  
+
 // Segment Events  
-  
-window.onload = function () {
-  try {
-    const formValuesCache = {};
+// Global variables
+let formValuesCache = {};
+let fbcCookie = getCookie('_fbc');
+let fbpCookie = getCookie('_fbp');
 
-    // Get all forms on the page
-    const forms = document.querySelectorAll('form');
-
-    forms.forEach((form) => {
-      form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
-
-      // Add an event listener to each input field for real-time updates
-      const inputFields = form.querySelectorAll('input, textarea, select');
-      inputFields.forEach((inputField) => {
-        inputField.addEventListener('input', () => {
-          // Only update the cache if the input value is not empty
-          if (inputField.value.trim() !== '') {
-            // Update the cache with the latest value
-            formValuesCache[inputField.name] = inputField.value;
-            console.log('Updated Form Values:', formValuesCache);
-          }
-        });
-      });
- 	 // Capture the hidden field `Form_Type` in the cache
-      const hiddenField = form.querySelector('input[name="Form_Type"]');
-
-      if (hiddenField) {
-
-        formValuesCache[hiddenField.name] = hiddenField.value; // Initialize with the value
-
-      }
-
-      // Update the cache for hidden fields on form submission
-      form.addEventListener('submit', () => {
-        if (hiddenField) {
-          formValuesCache[hiddenField.name] = hiddenField.value; // Ensure it captures on submit
-        }
-
-      });
-    });
-
-  } catch (error) {
-    console.error('Error initializing form tracking:', error);
-  }
-};
-
+// Form field mapping
 const formFieldTraitMapping = [
   { inputName: 'first_name', traitName: 'firstName' },
   { inputName: 'last_name', traitName: 'lastName' },
@@ -345,7 +222,6 @@ const formFieldTraitMapping = [
   { inputName: 'input_17', traitName: 'company' },
   { inputName: 'input_20', traitName: 'country' },
 ];
-
 
 // Helper functions for transformations
 const trimWhitespace = (value) => value.trim();
@@ -390,11 +266,50 @@ const normalizeValue = (value, key) => {
 
   return value;
 };
-  
-const fbcCookie = getCookie('_fbc');
-const fbpCookie = getCookie('_fbp');
-  
-const formSubmittedTrack = (event, formValuesCache) => {
+
+// Initialize tracking once the window is loaded
+window.onload = function () {
+  try {
+    // Get all forms on the page
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach((form) => {
+      form.addEventListener('submit', (event) => formSubmittedTrack(event));
+
+      // Add an event listener to each input field for real-time updates
+      const inputFields = form.querySelectorAll('input, textarea, select');
+      inputFields.forEach((inputField) => {
+        inputField.addEventListener('input', () => {
+          // Only update the cache if the input value is not empty
+          if (inputField.value.trim() !== '') {
+            // Update the cache with the latest value
+            formValuesCache[inputField.name] = inputField.value;
+            console.log('Updated Form Values:', formValuesCache);
+          }
+        });
+      });
+
+      // Capture the hidden field `Form_Type` in the cache
+      const hiddenField = form.querySelector('input[name="Form_Type"]');
+      if (hiddenField) {
+        formValuesCache[hiddenField.name] = hiddenField.value; // Initialize with the value
+      }
+
+      // Update the cache for hidden fields on form submission
+      form.addEventListener('submit', () => {
+        if (hiddenField) {
+          formValuesCache[hiddenField.name] = hiddenField.value; // Ensure it captures on submit
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error('Error initializing form tracking:', error);
+  }
+};
+
+// Form submission tracking function
+const formSubmittedTrack = (event) => {
   try {
     const formElement = event.target;
     const traits = {};
@@ -426,27 +341,7 @@ const formSubmittedTrack = (event, formValuesCache) => {
     // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
-    // Get the email from formValuesCache or traits
-    let email = formValuesCache.email || traits.email;
-
-    // Define hashedEmail before the if block to avoid "undefined" errors
-    let hashedEmail = false; // Default value when email is not available
-
-    if (email) {
-      // Ensure sha256 function is called and result is stored in hashedEmail
-      hashedEmail = sha256(email) || false;
-
-      // Check if hashedEmail is valid before using it
-      if (hashedEmail) {
-        console.log(hashedEmail);
-      } else {
-        console.log("Hashing failed or no valid result.");
-      }
-    } else {
-      console.log("No email provided.");
-    }
-
-    // Track the form submission with hashedEmail (even if it's false)
+    // Track the form submission
     analytics.track(
       'Form Submitted',
       {
@@ -459,7 +354,7 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
-        hashed_email: hashedEmail, // This will either be false or the hashed email
+	email: traits.email || null,
         _fbc: fbcCookie || null,
         _fbp: fbpCookie || null,
       },
@@ -473,7 +368,101 @@ const formSubmittedTrack = (event, formValuesCache) => {
   }
 };
 
-  
+document.addEventListener('gform/theme/scripts_loaded', () => {
+  gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
+    const formElement = data.form;
+	console.log(formElement);
+    const traits = {};
+
+    // Define the form field mapping
+    const formFieldTraitMapping = [
+      { inputName: 'first_name', traitName: 'firstName' },
+      { inputName: 'last_name', traitName: 'lastName' },
+      { inputName: 'email', traitName: 'email' },
+      { inputName: 'phone_number', traitName: 'phone' },
+      { inputName: 'company', traitName: 'company' },
+      { inputName: 'country', traitName: 'country' },
+    ];
+
+    // Helper functions for transformations
+    const trimWhitespace = (value) => value.trim();
+    const toLowerCase = (value) => value.toLowerCase();
+    const formatPhoneNumber = (phone, countryCode = '1') => {
+      const cleaned = phone.replace(/[^a-zA-Z0-9]/g, '').replace(/^0+/, '');
+      return `${countryCode}${cleaned}`;
+    };
+
+    // Normalize form values
+    const normalizeValue = (value, key) => {
+      if (!value) return null;
+
+      value = trimWhitespace(value);
+
+      switch (key) {
+        case 'firstName':
+        case 'lastName':
+        case 'country':
+          value = toLowerCase(value);
+          break;
+        case 'phone':
+          value = formatPhoneNumber(value); // Assuming '1' as default country code
+          break;
+        case 'email':
+          value = value.toLowerCase();
+          break;
+        default:
+          break;
+      }
+
+      return value;
+    };
+
+    // Map form field values to traits based on formFieldTraitMapping
+    formFieldTraitMapping.forEach((mapping) => {
+      const field = gform.utils.getNode(`.gfield--type-${mapping.inputName} input`, formElement, true);
+      if (field) {
+        let value = field.value || null;
+
+        // Normalize the value if it exists
+        if (value) {
+          value = normalizeValue(value, mapping.traitName);
+        }
+
+        // Only add to traits if the value is not null
+        if (value) {
+          traits[mapping.traitName] = value;
+        }
+      }
+    });
+
+    // Log the traits object to be sent to Segment (optional)
+    console.log("Final traits object to be sent to Segment:", traits);
+
+    // Call the identify function from Segment with the final traits object
+    analytics.identify(traits);
+
+    // Track the form submission event
+    analytics.track(
+      'Form Submitted',
+      {
+        form_id: formElement.parentElement.id,
+        form_name: formElement.dataset.formName,
+        form_type: formElement.dataset.formType,
+        form_location: document.location.pathname,
+        form_result: 'success',
+	email: traits.email,
+      },
+      {
+        traits,
+      }
+    );
+
+    return data;
+   
+  });
+});
+
+
 function getCookie(cookieName) {
   const name = cookieName + '=';
   const decodedCookie = decodeURIComponent(document.cookie);
@@ -520,6 +509,9 @@ function getCookie(cookieName) {
 
   return null;
 }
+
+
+
 
 
 // LINK and CTA Clicked
