@@ -367,7 +367,74 @@ const formSubmittedTrack = (event) => {
   }
 };
 
+document.addEventListener('gform/theme/scripts_loaded', () => {
+  gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
+    try {
+      // Assuming `data` contains the form values
+      const formValuesCache = {}; // Initialize a local cache for this form submission
 
+      // Loop through the form fields and update the cache
+      data.fields.forEach((field) => {
+        formValuesCache[field.name] = field.value;
+      });
+
+      // Create the traits object
+      const traits = {};
+
+      // Map form field values to traits based on formFieldTraitMapping
+      formFieldTraitMapping.forEach((mapping) => {
+        let value = formValuesCache[mapping.inputName] || null;
+        console.log("Cache value for", mapping.inputName, ":", value);
+
+        // Normalize the value if it exists
+        if (value) {
+          value = normalizeValue(value, mapping.traitName);
+          console.log("Normalized value for", mapping.traitName, ":", value);
+        }
+
+        // Only add to traits if the value is not null
+        if (value) {
+          traits[mapping.traitName] = value;
+        } else {
+          console.log("No value for trait:", mapping.traitName);
+        }
+      });
+
+      // Log to check final traits structure
+      console.log("Final traits object to be sent to Segment:", traits);
+
+      // Call the identify function from Segment with the final traits object
+      analytics.identify(traits);
+
+      // Track the form submission
+      analytics.track(
+        'Form Submitted',
+        {
+          form_id: data.form_id, // Use the form ID from the data
+          form_name: data.form_name, // Use the form name from the data
+          form_type: formValuesCache['Form_Type'], // Grab the Form_Type from the cache
+          form_description: data.form_description, // Use the form description from the data
+          form_location: document.location.pathname, // Track the page location
+          form_result: 'success', // Assuming success here, you can adjust based on conditions
+          non_interaction: false,
+          _fbc: fbcCookie || null,
+          _fbp: fbpCookie || null,
+        },
+        {
+          traits,
+        }
+      );
+
+      // Return the data to proceed with form submission
+      return data;
+      
+    } catch (error) {
+      console.error('Error handling form submission with gform trigger:', error);
+      // Return data to allow form submission to proceed even in case of an error
+      return data;
+    }
+  });
+});
 
 
   
