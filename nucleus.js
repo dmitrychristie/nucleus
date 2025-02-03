@@ -354,6 +354,7 @@ const formSubmittedTrack = (event) => {
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
+	email: traits.email || null,
         _fbc: fbcCookie || null,
         _fbp: fbpCookie || null,
       },
