@@ -440,15 +440,20 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
     // Call the identify function from Segment with the final traits object
     analytics.identify(traits);
 
+	  async (data) => {
+        const email = gform.utils.getNode('.gfield--type-email input', data.form, true);
+        console.log('email:', email.value);
+
     // Track the form submission event
     analytics.track(
-      'Test Form Submitted',
+      'Form Submitted',
       {
         form_id: formElement.parentElement.id,
         form_name: formElement.dataset.formName,
         form_type: formElement.dataset.formType,
         form_location: document.location.pathname,
         form_result: 'success',
+	email: email.value,
       },
       {
         traits,
