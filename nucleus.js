@@ -44,12 +44,11 @@
 
 	 analytics.addSourceMiddleware(addBuildProduct);
 
-	if(window.nucleusGA4MeasurementId) { 
-		const addGA4Properties = ({ payload, next, integrations }) => {
+	const addGA4Properties = ({ payload, next, integrations }) => {
     try {
         payload.obj.context = payload.obj.context || {};
-
-	let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+        
+        let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
         console.log(nucleusGA4MeasurementId);
 
         // Make sure nucleusGA4MeasurementId is long enough before calling substring
@@ -137,9 +136,6 @@
 };
 
 analytics.addSourceMiddleware(addGA4Properties);
-	} else {
-console.log('Warning! GA4 Measurement ID is not defined');
-}
 
 
 
@@ -157,7 +153,7 @@ analytics.addSourceMiddleware(generateEventId);
 
 
 
-
+	
         // Function to look up the write key based on the domain name
       function getWriteKey() {
         var domain = window.location.hostname;
@@ -318,24 +314,24 @@ const formSubmittedTrack = (event, formValuesCache) => {
     let autofillDetected = false;
 
     // Map form field values to traits based on formFieldTraitMapping
-    formFieldTraitMapping.forEach((mapping) => {
-      // Get the value from the cache using the input name
-      let value = formValuesCache[mapping.inputName] || null;
-      console.log("Cache value for", mapping.inputName, ":", value);
+formFieldTraitMapping.forEach((mapping) => {
+  // Get the value from the cache using the input name
+  let value = formValuesCache[mapping.inputName] || null;
+  console.log("Cache value for", mapping.inputName, ":", value);
 
-      // Normalize the value if it exists
-      if (value) {
-        value = normalizeValue(value, mapping.traitName);
-        console.log("Normalized value for", mapping.traitName, ":", value);
-      }
+  // Normalize the value if it exists
+  if (value) {
+    value = normalizeValue(value, mapping.traitName);
+    console.log("Normalized value for", mapping.traitName, ":", value);
+  }
 
-      // Only add to traits if the value is not null
-      if (value) {
-        traits[mapping.traitName] = value;
-      } else {
-        console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
-      }
-    });
+  // Only add to traits if the value is not null
+  if (value) {
+    traits[mapping.traitName] = value;
+  } else {
+    console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
+  }
+});
 
     // Log to check final traits structure
     console.log("Final traits object to be sent to Segment:", traits);
@@ -356,7 +352,6 @@ const formSubmittedTrack = (event, formValuesCache) => {
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
-	email: traits.email || null,
         _fbc: fbcCookie || null,
         _fbp: fbpCookie || null,
       },
@@ -370,102 +365,8 @@ const formSubmittedTrack = (event, formValuesCache) => {
   }
 };
 
-document.addEventListener('gform/theme/scripts_loaded', () => {
-  gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
-    const formElement = data.form;
-	console.log(formElement);
-    const traits = {};
-
-    // Define the form field mapping
-    const formFieldTraitMapping = [
-      { inputName: 'first_name', traitName: 'firstName' },
-      { inputName: 'last_name', traitName: 'lastName' },
-      { inputName: 'email', traitName: 'email' },
-      { inputName: 'phone_number', traitName: 'phone' },
-      { inputName: 'company', traitName: 'company' },
-      { inputName: 'country', traitName: 'country' },
-    ];
-
-    // Helper functions for transformations
-    const trimWhitespace = (value) => value.trim();
-    const toLowerCase = (value) => value.toLowerCase();
-    const formatPhoneNumber = (phone, countryCode = '1') => {
-      const cleaned = phone.replace(/[^a-zA-Z0-9]/g, '').replace(/^0+/, '');
-      return `${countryCode}${cleaned}`;
-    };
-
-    // Normalize form values
-    const normalizeValue = (value, key) => {
-      if (!value) return null;
-
-      value = trimWhitespace(value);
-
-      switch (key) {
-        case 'firstName':
-        case 'lastName':
-        case 'country':
-          value = toLowerCase(value);
-          break;
-        case 'phone':
-          value = formatPhoneNumber(value); // Assuming '1' as default country code
-          break;
-        case 'email':
-          value = value.toLowerCase();
-          break;
-        default:
-          break;
-      }
-
-      return value;
-    };
-
-    // Map form field values to traits based on formFieldTraitMapping
-    formFieldTraitMapping.forEach((mapping) => {
-      const field = gform.utils.getNode(`.gfield--type-${mapping.inputName} input`, formElement, true);
-      if (field) {
-        let value = field.value || null;
-
-        // Normalize the value if it exists
-        if (value) {
-          value = normalizeValue(value, mapping.traitName);
-        }
-
-        // Only add to traits if the value is not null
-        if (value) {
-          traits[mapping.traitName] = value;
-        }
-      }
-    });
-
-    // Log the traits object to be sent to Segment (optional)
-    console.log("Final traits object to be sent to Segment:", traits);
-
-    // Call the identify function from Segment with the final traits object
-    analytics.identify(traits);
-
-    // Track the form submission event
-    analytics.track(
-      'Form Submitted',
-      {
-        form_id: formElement.parentElement.id,
-        form_name: formElement.dataset.formName,
-        form_type: formElement.dataset.formType,
-        form_location: document.location.pathname,
-        form_result: 'success',
-	email: traits.email,
-      },
-      {
-        traits,
-      }
-    );
-
-    return data;
-   
-  });
-});
-
-
-unction getCookie(cookieName) {
+  
+function getCookie(cookieName) {
   const name = cookieName + '=';
   const decodedCookie = decodeURIComponent(document.cookie);
   const cookieArray = decodedCookie.split(';');
