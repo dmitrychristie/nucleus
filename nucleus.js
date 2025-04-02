@@ -1,13 +1,13 @@
 !function(){
     var analytics = window.analytics = window.analytics || [];
-    
+
     if (!analytics.initialize) {
       if (analytics.invoked) {
         window.console && console.error && console.error("Segment snippet included twice.");
       } else {
         analytics.invoked = !0;
         analytics.methods = ["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];
-        
+
         analytics.factory = function(e){
           return function(){
             var t = Array.prototype.slice.call(arguments);
@@ -16,7 +16,7 @@
             return analytics;
           }
         };
-        
+
         for (var e = 0; e < analytics.methods.length; e++) {
           var key = analytics.methods[e];
           analytics[key] = analytics.factory(key);
@@ -44,11 +44,12 @@
 
 	 analytics.addSourceMiddleware(addBuildProduct);
 
-	const addGA4Properties = ({ payload, next, integrations }) => {
+	if(window.nucleusGA4MeasurementId) { 
+		const addGA4Properties = ({ payload, next, integrations }) => {
     try {
         payload.obj.context = payload.obj.context || {};
-        
-        let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
+
+	let nucleusGA4MeasurementId = window.nucleusGA4MeasurementId || '';
         console.log(nucleusGA4MeasurementId);
 
         // Make sure nucleusGA4MeasurementId is long enough before calling substring
@@ -136,6 +137,9 @@
 };
 
 analytics.addSourceMiddleware(addGA4Properties);
+	} else {
+console.log('Warning! GA4 Measurement ID is not defined');
+}
 
 
 
@@ -153,7 +157,7 @@ analytics.addSourceMiddleware(generateEventId);
 
 
 
-	
+
         // Function to look up the write key based on the domain name
       function getWriteKey() {
         var domain = window.location.hostname;
@@ -184,7 +188,7 @@ analytics.addSourceMiddleware(generateEventId);
           return "XeEJN55FrsKZFzBKqtu6wqnWRaZmXoKK";
         }
       }
-		
+
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
@@ -196,54 +200,14 @@ analytics.addSourceMiddleware(generateEventId);
   }();
 
 
-  
+
 // Segment Events  
-  
-window.onload = function () {
-  try {
-    const formValuesCache = {};
+// Global variables
+let formValuesCache = {};
+let fbcCookie = getCookie('_fbc');
+let fbpCookie = getCookie('_fbp');
 
-    // Get all forms on the page
-    const forms = document.querySelectorAll('form');
-
-    forms.forEach((form) => {
-      form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
-
-      // Add an event listener to each input field for real-time updates
-      const inputFields = form.querySelectorAll('input, textarea, select');
-      inputFields.forEach((inputField) => {
-        inputField.addEventListener('input', () => {
-          // Only update the cache if the input value is not empty
-          if (inputField.value.trim() !== '') {
-            // Update the cache with the latest value
-            formValuesCache[inputField.name] = inputField.value;
-            console.log('Updated Form Values:', formValuesCache);
-          }
-        });
-      });
- 	 // Capture the hidden field `Form_Type` in the cache
-      const hiddenField = form.querySelector('input[name="Form_Type"]');
-
-      if (hiddenField) {
-
-        formValuesCache[hiddenField.name] = hiddenField.value; // Initialize with the value
-
-      }
-
-      // Update the cache for hidden fields on form submission
-      form.addEventListener('submit', () => {
-        if (hiddenField) {
-          formValuesCache[hiddenField.name] = hiddenField.value; // Ensure it captures on submit
-        }
-
-      });
-    });
-
-  } catch (error) {
-    console.error('Error initializing form tracking:', error);
-  }
-};
-
+// Form field mapping
 const formFieldTraitMapping = [
   { inputName: 'first_name', traitName: 'firstName' },
   { inputName: 'last_name', traitName: 'lastName' },
@@ -258,7 +222,6 @@ const formFieldTraitMapping = [
   { inputName: 'input_17', traitName: 'company' },
   { inputName: 'input_20', traitName: 'country' },
 ];
-
 
 // Helper functions for transformations
 const trimWhitespace = (value) => value.trim();
@@ -303,35 +266,74 @@ const normalizeValue = (value, key) => {
 
   return value;
 };
-  
-const fbcCookie = getCookie('_fbc');
-const fbpCookie = getCookie('_fbp');
-  
-const formSubmittedTrack = (event, formValuesCache) => {
+
+// Initialize tracking once the window is loaded
+window.onload = function () {
+  try {
+    // Get all forms on the page
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach((form) => {
+      form.addEventListener('submit', (event) => formSubmittedTrack(event));
+
+      // Add an event listener to each input field for real-time updates
+      const inputFields = form.querySelectorAll('input, textarea, select');
+      inputFields.forEach((inputField) => {
+        inputField.addEventListener('input', () => {
+          // Only update the cache if the input value is not empty
+          if (inputField.value.trim() !== '') {
+            // Update the cache with the latest value
+            formValuesCache[inputField.name] = inputField.value;
+            console.log('Updated Form Values:', formValuesCache);
+          }
+        });
+      });
+
+      // Capture the hidden field `Form_Type` in the cache
+      const hiddenField = form.querySelector('input[name="Form_Type"]');
+      if (hiddenField) {
+        formValuesCache[hiddenField.name] = hiddenField.value; // Initialize with the value
+      }
+
+      // Update the cache for hidden fields on form submission
+      form.addEventListener('submit', () => {
+        if (hiddenField) {
+          formValuesCache[hiddenField.name] = hiddenField.value; // Ensure it captures on submit
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error('Error initializing form tracking:', error);
+  }
+};
+
+// Form submission tracking function
+const formSubmittedTrack = (event) => {
   try {
     const formElement = event.target;
     const traits = {};
     let autofillDetected = false;
 
     // Map form field values to traits based on formFieldTraitMapping
-formFieldTraitMapping.forEach((mapping) => {
-  // Get the value from the cache using the input name
-  let value = formValuesCache[mapping.inputName] || null;
-  console.log("Cache value for", mapping.inputName, ":", value);
+    formFieldTraitMapping.forEach((mapping) => {
+      // Get the value from the cache using the input name
+      let value = formValuesCache[mapping.inputName] || null;
+      console.log("Cache value for", mapping.inputName, ":", value);
 
-  // Normalize the value if it exists
-  if (value) {
-    value = normalizeValue(value, mapping.traitName);
-    console.log("Normalized value for", mapping.traitName, ":", value);
-  }
+      // Normalize the value if it exists
+      if (value) {
+        value = normalizeValue(value, mapping.traitName);
+        console.log("Normalized value for", mapping.traitName, ":", value);
+      }
 
-  // Only add to traits if the value is not null
-  if (value) {
-    traits[mapping.traitName] = value;
-  } else {
-    console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
-  }
-});
+      // Only add to traits if the value is not null
+      if (value) {
+        traits[mapping.traitName] = value;
+      } else {
+        console.log("No value for trait:", mapping.traitName); // Log if no value is assigned
+      }
+    });
 
     // Log to check final traits structure
     console.log("Final traits object to be sent to Segment:", traits);
@@ -352,6 +354,7 @@ formFieldTraitMapping.forEach((mapping) => {
         form_location: document.location.pathname,
         form_result: 'success',
         non_interaction: false,
+	email: traits.email || null,
         _fbc: fbcCookie || null,
         _fbp: fbpCookie || null,
       },
@@ -365,7 +368,101 @@ formFieldTraitMapping.forEach((mapping) => {
   }
 };
 
-  
+document.addEventListener('gform/theme/scripts_loaded', () => {
+  gform.utils.addAsyncFilter('gform/submission/pre_submission', async (data) => {
+    const formElement = data.form;
+	console.log(formElement);
+    const traits = {};
+
+    // Define the form field mapping
+    const formFieldTraitMapping = [
+      { inputName: 'first_name', traitName: 'firstName' },
+      { inputName: 'last_name', traitName: 'lastName' },
+      { inputName: 'email', traitName: 'email' },
+      { inputName: 'phone_number', traitName: 'phone' },
+      { inputName: 'company', traitName: 'company' },
+      { inputName: 'country', traitName: 'country' },
+    ];
+
+    // Helper functions for transformations
+    const trimWhitespace = (value) => value.trim();
+    const toLowerCase = (value) => value.toLowerCase();
+    const formatPhoneNumber = (phone, countryCode = '1') => {
+      const cleaned = phone.replace(/[^a-zA-Z0-9]/g, '').replace(/^0+/, '');
+      return `${countryCode}${cleaned}`;
+    };
+
+    // Normalize form values
+    const normalizeValue = (value, key) => {
+      if (!value) return null;
+
+      value = trimWhitespace(value);
+
+      switch (key) {
+        case 'firstName':
+        case 'lastName':
+        case 'country':
+          value = toLowerCase(value);
+          break;
+        case 'phone':
+          value = formatPhoneNumber(value); // Assuming '1' as default country code
+          break;
+        case 'email':
+          value = value.toLowerCase();
+          break;
+        default:
+          break;
+      }
+
+      return value;
+    };
+
+    // Map form field values to traits based on formFieldTraitMapping
+    formFieldTraitMapping.forEach((mapping) => {
+      const field = gform.utils.getNode(`.gfield--type-${mapping.inputName} input`, formElement, true);
+      if (field) {
+        let value = field.value || null;
+
+        // Normalize the value if it exists
+        if (value) {
+          value = normalizeValue(value, mapping.traitName);
+        }
+
+        // Only add to traits if the value is not null
+        if (value) {
+          traits[mapping.traitName] = value;
+        }
+      }
+    });
+
+    // Log the traits object to be sent to Segment (optional)
+    console.log("Final traits object to be sent to Segment:", traits);
+
+    // Call the identify function from Segment with the final traits object
+    analytics.identify(traits);
+
+    // Track the form submission event
+    analytics.track(
+      'Form Submitted',
+      {
+        form_id: formElement.parentElement.id,
+        form_name: formElement.dataset.formName,
+        form_type: formElement.dataset.formType,
+        form_location: document.location.pathname,
+        form_result: 'success',
+	email: traits.email,
+      },
+      {
+        traits,
+      }
+    );
+
+    return data;
+   
+  });
+});
+
+
 function getCookie(cookieName) {
   const name = cookieName + '=';
   const decodedCookie = decodeURIComponent(document.cookie);
@@ -412,6 +509,9 @@ function getCookie(cookieName) {
 
   return null;
 }
+
+
+
 
 
 // LINK and CTA Clicked
@@ -474,24 +574,3 @@ document.addEventListener('click', (event) => {
     }
   }
 });
-
-//run identify call in case if there's a query string parameter nucleus_user_id
-
-(function() {
-  function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-  }
-
-  analytics.ready(function() {
-    const nucleusUserId = getQueryParam('nucleus_user_id');
-
-    if (nucleusUserId) {
-      const currentUserId = analytics.user().id();
-
-      if (currentUserId !== nucleusUserId) {
-        analytics.identify(nucleusUserId);
-      }
-    }
-  });
-})();
