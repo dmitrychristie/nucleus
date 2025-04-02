@@ -1,13 +1,13 @@
 !function(){
     var analytics = window.analytics = window.analytics || [];
-
+    
     if (!analytics.initialize) {
       if (analytics.invoked) {
         window.console && console.error && console.error("Segment snippet included twice.");
       } else {
         analytics.invoked = !0;
         analytics.methods = ["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];
-
+        
         analytics.factory = function(e){
           return function(){
             var t = Array.prototype.slice.call(arguments);
@@ -16,7 +16,7 @@
             return analytics;
           }
         };
-
+        
         for (var e = 0; e < analytics.methods.length; e++) {
           var key = analytics.methods[e];
           analytics[key] = analytics.factory(key);
@@ -188,7 +188,7 @@ analytics.addSourceMiddleware(generateEventId);
           return "XeEJN55FrsKZFzBKqtu6wqnWRaZmXoKK";
         }
       }
-
+		
         analytics._writeKey = getWriteKey();
         analytics.SNIPPET_VERSION = "4.15.3";
         analytics.load(analytics._writeKey);
@@ -200,14 +200,54 @@ analytics.addSourceMiddleware(generateEventId);
   }();
 
 
-
+  
 // Segment Events  
-// Global variables
-let formValuesCache = {};
-let fbcCookie = getCookie('_fbc');
-let fbpCookie = getCookie('_fbp');
+  
+window.onload = function () {
+  try {
+    const formValuesCache = {};
 
-// Form field mapping
+    // Get all forms on the page
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach((form) => {
+      form.addEventListener('submit', (event) => formSubmittedTrack(event, formValuesCache));
+
+      // Add an event listener to each input field for real-time updates
+      const inputFields = form.querySelectorAll('input, textarea, select');
+      inputFields.forEach((inputField) => {
+        inputField.addEventListener('input', () => {
+          // Only update the cache if the input value is not empty
+          if (inputField.value.trim() !== '') {
+            // Update the cache with the latest value
+            formValuesCache[inputField.name] = inputField.value;
+            console.log('Updated Form Values:', formValuesCache);
+          }
+        });
+      });
+ 	 // Capture the hidden field `Form_Type` in the cache
+      const hiddenField = form.querySelector('input[name="Form_Type"]');
+
+      if (hiddenField) {
+
+        formValuesCache[hiddenField.name] = hiddenField.value; // Initialize with the value
+
+      }
+
+      // Update the cache for hidden fields on form submission
+      form.addEventListener('submit', () => {
+        if (hiddenField) {
+          formValuesCache[hiddenField.name] = hiddenField.value; // Ensure it captures on submit
+        }
+
+      });
+    });
+
+  } catch (error) {
+    console.error('Error initializing form tracking:', error);
+  }
+};
+
 const formFieldTraitMapping = [
   { inputName: 'first_name', traitName: 'firstName' },
   { inputName: 'last_name', traitName: 'lastName' },
@@ -222,6 +262,7 @@ const formFieldTraitMapping = [
   { inputName: 'input_17', traitName: 'company' },
   { inputName: 'input_20', traitName: 'country' },
 ];
+
 
 // Helper functions for transformations
 const trimWhitespace = (value) => value.trim();
@@ -266,50 +307,11 @@ const normalizeValue = (value, key) => {
 
   return value;
 };
-
-// Initialize tracking once the window is loaded
-window.onload = function () {
-  try {
-    // Get all forms on the page
-    const forms = document.querySelectorAll('form');
-
-    forms.forEach((form) => {
-      form.addEventListener('submit', (event) => formSubmittedTrack(event));
-
-      // Add an event listener to each input field for real-time updates
-      const inputFields = form.querySelectorAll('input, textarea, select');
-      inputFields.forEach((inputField) => {
-        inputField.addEventListener('input', () => {
-          // Only update the cache if the input value is not empty
-          if (inputField.value.trim() !== '') {
-            // Update the cache with the latest value
-            formValuesCache[inputField.name] = inputField.value;
-            console.log('Updated Form Values:', formValuesCache);
-          }
-        });
-      });
-
-      // Capture the hidden field `Form_Type` in the cache
-      const hiddenField = form.querySelector('input[name="Form_Type"]');
-      if (hiddenField) {
-        formValuesCache[hiddenField.name] = hiddenField.value; // Initialize with the value
-      }
-
-      // Update the cache for hidden fields on form submission
-      form.addEventListener('submit', () => {
-        if (hiddenField) {
-          formValuesCache[hiddenField.name] = hiddenField.value; // Ensure it captures on submit
-        }
-      });
-    });
-
-  } catch (error) {
-    console.error('Error initializing form tracking:', error);
-  }
-};
-
-// Form submission tracking function
-const formSubmittedTrack = (event) => {
+  
+const fbcCookie = getCookie('_fbc');
+const fbpCookie = getCookie('_fbp');
+  
+const formSubmittedTrack = (event, formValuesCache) => {
   try {
     const formElement = event.target;
     const traits = {};
@@ -463,7 +465,7 @@ document.addEventListener('gform/theme/scripts_loaded', () => {
 });
 
 
-function getCookie(cookieName) {
+unction getCookie(cookieName) {
   const name = cookieName + '=';
   const decodedCookie = decodeURIComponent(document.cookie);
   const cookieArray = decodedCookie.split(';');
@@ -509,9 +511,6 @@ function getCookie(cookieName) {
 
   return null;
 }
-
-
-
 
 
 // LINK and CTA Clicked
@@ -574,3 +573,24 @@ document.addEventListener('click', (event) => {
     }
   }
 });
+
+//run identify call in case if there's a query string parameter nucleus_user_id
+
+(function() {
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  analytics.ready(function() {
+    const nucleusUserId = getQueryParam('nucleus_user_id');
+
+    if (nucleusUserId) {
+      const currentUserId = analytics.user().id();
+
+      if (currentUserId !== nucleusUserId) {
+        analytics.identify(nucleusUserId);
+      }
+    }
+  });
+})();
